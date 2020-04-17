@@ -1,0 +1,430 @@
+
+/*SIDEBAR*/
+
+.vertical-nav {
+	min-width: 20rem;
+	width: 20rem;
+	height: 100vh;
+	position: fixed;
+	top: 0;
+	left: 0;
+	box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.1);
+	transition: all 0.4s;
+}
+
+#sidebar.active {
+	margin-left: -20rem;
+}
+
+#content.active {
+	width: 100%;
+	margin: 0;
+}
+
+@media (max-width: 768px) {
+	#sidebar {
+		margin-left: -20rem;
+	}
+
+	#sidebar.active {
+		margin-left: 0;
+	}
+
+	#content {
+		width: 100%;
+		margin: 0;
+	}
+
+	#content.active {
+		margin-left: 20rem;
+		width: calc(100% - 20rem);
+	}
+}
+
+.text-uppercase {
+	letter-spacing: 0.1em;
+}
+
+/*footer {
+	border-top: 1px solid #dcdcdc;
+	color: #666;
+	margin: 2rem;
+}*/
+
+/*footer p {
+	margin: 1em 0;
+	overflow-wrap: break-word;
+	padding: 0 1rem;
+}*/
+
+* {
+	margin: 0;
+	padding: 0;
+	border: none;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+#sidebar {
+	background: #393833;
+	min-height: 100%;
+	left: 0px;
+	position: fixed;
+	top: 0;
+	width: 20rem;
+	z-index: 2;
+	transition: all 0.3s;
+}
+
+
+a[data-toggle="collapse"] {
+	position: relative;
+}
+
+.dropdown-toggle::after {
+	display: block;
+	position: absolute;
+	top: 50%;
+	right: 20px;
+	transform: translateY(-50%);
+}
+
+
+#sidebar .sidebar-header {
+	background: #468499;
+	color: #fbe8d3;
+	padding: 1.5em 1em;
+}
+
+#sidebar .sidebar-header h1 {
+	font-family: 'Ubuntu';
+	font-size: 2rem;
+	font-weight: 700;
+	letter-spacing: 0.4em;
+}
+
+#sidebar .sidebar-header h3 {
+	font-size: 0.8rem;
+	font-style: italic;
+	font-weight: 400;
+	text-align: center;
+}
+
+.user-input {
+	color: #fcfcfc;
+	margin: 2rem 1rem;
+}
+
+.user-input section {
+	padding: 0.25em 0;
+}
+
+.user-input section:first-of-type {
+	border-bottom: 1px solid #4e6487;
+	padding-bottom: 1rem;
+	margin-bottom: 0.5rem;
+}
+
+input[type="text"] {
+	background: #f8f8f8;
+	border: none;
+	box-shadow: none;
+	display: block;
+	font-family: 'Lato', sans-serif;
+	font-size: 0.8rem;
+	margin: 1rem 0;
+	padding: 0.5em;
+	transition: background 0.2s;
+	width: 100%;
+}
+
+input[type="text"].error {
+	background: #f35145;
+	border: 1px solid #4e6487;
+	box-shadow: none;
+	display: block;
+	font-family: 'Lato', sans-serif;
+	font-size: 0.8rem;
+	margin: 1rem 0;
+	padding: 0.5em;
+	transition: background 0.2s;
+	width: 100%;
+}
+
+.button-plot {
+	background: #468499;
+	color: #fbe8d3;
+	font-family: 'Ubuntu';
+	font-size: 1.5rem;
+	font-weight: 700;
+	justify-content: center;
+	letter-spacing: 0.4em;
+	padding: 0.5em 1em;
+	position: relative;
+	text-align: center;
+	text-transform: uppercase;
+	margin: 0 60px;
+	cursor: pointer;
+}
+
+.query-but {
+	background: #468499;
+	color: #fbe8d3;
+	font-family: 'Ubuntu';
+	font-size: 0.9rem;
+	font-weight: 700;
+	justify-content: center;
+	letter-spacing: 0.2em;
+	padding: 0.5em 1em;
+	position: relative;
+	text-align: center;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+
+.f-input {
+	font-size: 0.8rem
+}
+
+
+body {
+	font-family: 'Poppins', sans-serif;
+	background: #fafafa;
+}
+
+p {
+	font-family: 'Poppins', sans-serif;
+	font-size: 0.9em;
+	font-weight: 300;
+	line-height: 1.7em;
+	color: #999;
+	margin-bottom: 1em;
+}
+
+#sidebar ul.components {
+	padding: 20px 0;
+	border-bottom: 1px solid #47748b;
+}
+
+#sidebar ul li a {
+	padding: 10px;
+	font-size: 0.9em;
+	display: block;
+	color: #fff;
+	text-transform: uppercase;
+	font-family: 'Ubuntu';
+}
+#sidebar ul li a:hover {
+	color: #7386D5;
+	background: #fff;
+}
+
+#sidebar ul li.active > a, a[aria-expanded="true"] {
+	color: #c607a9;
+	background: #468499;
+}
+ul ul li {
+	font-size: 0.8em !important;
+	padding: 0px 10px !important;
+	background: #468499;
+	font-family: 'Ubuntu';
+}
+
+.del-button {
+	padding: 0px 5px;
+	background: #468499;
+}
+
+.del-button:hover {
+	cursor: pointer;
+}
+
+
+.btn-circle {
+	width: 25px;
+	height: 25px;
+	line-height: 25px;
+	text-align: center;
+	padding: 0;
+	border-radius: 50%;
+}
+
+.btn-circle i {
+	position: relative;
+	top: -1px;
+}
+
+.btn-circle-sm {
+	width: 25px;
+	height: 25px;
+	line-height: 25px;
+	font-size: 0.9rem;
+}
+
+
+/*NAVBAR*/
+
+#content {
+  position: absolute;
+  top: 0;
+  right: 0;
+  -webkit-transition: width 0.2s linear;
+  transition: width 0.2s linear;
+  width: calc(100% - 20rem);
+  background-color: #F4F7FA;
+  min-height: 100vh;
+  padding-bottom: 50px;
+}
+
+a {
+  display: inline-block;
+  text-decoration: none;
+  color: #fff;
+}
+
+i {
+  display: inline-block;
+}
+
+i[class*='icon-'] {
+  -webkit-transform: translateY(4px);
+  transform: translateY(4px);
+}
+
+nav.navbar {
+	background: #393833;
+	padding: .8rem 0;
+	font-family: 'Ubuntu';
+}
+
+
+nav.navbar a {
+	font-size: 1rem;
+	color: #fff;
+	position: relative;
+}
+
+nav.navbar a.menu-btn {
+	width: 40px;
+	height: 40px;
+	line-height: 40px;
+	background: #393833;
+	color: #fff;
+	text-align: center;
+	padding: 0 !important;
+}
+
+nav.navbar a.menu-btn i[class*='icon-'] {
+	-webkit-transform: translateY(4px);
+	transform: translateY(4px);
+}
+
+nav.navbar a.menu-btn:hover {
+	background: #468499;
+}
+
+@media (min-width: 768px) {
+	.container-fluid {
+		padding: 0 3rem;
+	}
+}
+
+nav.navbar .container-fluid {
+	width: 100%;
+}
+
+nav.navbar .navbar-holder {
+	width: 100%;
+}
+
+nav.navbar .nav-link {
+	font-size: 1rem;
+	width: 100px;
+	height: 40px;
+	line-height: 40px;
+	background: #393833;
+	color: #fff;
+	text-align: center;
+	padding: 0 !important;
+}
+
+nav.navbar .nav-link.active {
+	background: #468499;
+}
+
+nav.navbar .nav-link:hover {
+	background: #468499;
+}
+
+
+/*DROPDOWNS*/
+
+section {
+  padding: 40px 0;
+}
+
+section.dashboard-drops .title {
+  font-size: 1rem;
+  font-weight: 300;
+  color: #fff;
+  margin: 0 20px;
+}
+
+.enh-title{
+  padding: 20px 0;
+}
+
+.bg-dark {
+  background-color: #393833 !important;
+}
+
+.has-shadow {
+  -webkit-box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1), -1px 0 2px  #393833;
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1), -1px 0 2px  #393833;
+}
+
+section.dashboard-drops div[class*='col-'] .item {
+  font-family: 'Ubuntu';
+  border-right: 1px solid #eee;
+  padding: 15px 0;
+  text-align: center;
+}
+
+section.dashboard-drops div[class*='col-']:last-of-type .item {
+  border-right: none;
+}
+
+
+/*PLOT*/
+
+.plottin {
+  background-color: #393833;
+  border: none;
+  -webkit-box-shadow: 0 0.125rem 0.8rem rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0.125rem 0.8rem rgba(0, 0, 0, 0.1);
+  border-radius: 1rem;
+}
+
+.plottin-header {
+  padding: 1.5rem 2rem;
+  background-color: #393833;
+  border-bottom: none;
+  -webkit-box-shadow: 0 0.125rem 0.8rem rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0.125rem 0.8rem rgba(0, 0, 0, 0.1);
+  color: #fff;
+  font-family: 'Ubuntu';
+}
+
+.plottin-header:first-child {
+  border-radius: calc(1rem - 1px) calc(1rem - 1px) 0 0;
+}
+
+.plottin-body {
+  padding: 0;
+  width: 99%;
+}
+
+.plottin-plot {
+	width: 99%;
+}
