@@ -428,3 +428,9 @@ section.dashboard-drops div[class*='col-']:last-of-type .item {
 .plottin-plot {
 	width: 99%;
 }
+
+.plottin-body-not {
+	margin: 20px 15px;
+	font-family: 'Ubuntu';
+	color: #fff;
+}

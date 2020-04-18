@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, session
-from flask_colorpicker import colorpicker
 import json
 import plotly
 import plotly.offline as py
@@ -11,7 +10,9 @@ import pandas as pd
 import pickle
  
 app = Flask(__name__)
-colorpicker(app)
+
+
+
 
 chrom_lst = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "X", "Y", "M"]
 samples = []
@@ -29,6 +30,8 @@ def home():
 	error_region = ''
 	region_mes = ''
 	ready_to_plot = False
+	start = 0
+	end = 0
 	if request.method == "POST" and 'file' in request.files:
 		file = request.files.getlist('file')
 		if len(file) > 1:
@@ -80,7 +83,7 @@ def home():
 		plotly_plot = create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start, end, chrom, None, None, None, None, None, None)
 	else:
 		plotly_plot = ""
-	return render_template("index.html", samples=samples, region=region, error_region=error_region, region_mes=region_mes, plotly_plot=plotly_plot, ready_to_plot=ready_to_plot, TF_options=TF_options, cpg_options=cpg_options, hmm_options=hmm_options, enh_dis=enh_dis)
+	return render_template("index.html", samples=samples, region=region, error_region=error_region, region_mes=region_mes, plotly_plot=plotly_plot, ready_to_plot=ready_to_plot, TF_options=TF_options, cpg_options=cpg_options, hmm_options=hmm_options, enh_dis=enh_dis, start=start, end=end)
 
 
 @app.route('/update_graph', methods=['GET', 'POST'])
@@ -122,11 +125,29 @@ def change_zoom():
 	enh_val = session.get('enh_val', None)
 	x_range = [float(i) for i in request.args.getlist('xrange[]')]
 	y_range = [float(i) for i in request.args.getlist('yrange[]')]
+	TF_value = request.args.getlist('TF_value[]')
+	cpg_value = request.args.getlist('cpg_value[]')
+	hmm_value = request.args.getlist('hmm_value[]')
+	enh_val = request.args['enh_val']
+	session['TF_value'] = TF_value
+	session['cpg_value'] = cpg_value
+	session['hmm_value'] = hmm_value
+	session['enh_val'] = enh_val
 	print(request.args)
 	graphJSON= create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start, end, chrom, TF_value, cpg_value, hmm_value, enh_val, x_range, y_range)
 	return graphJSON
 
-
+@app.after_request
+def add_header(r):
+    """
+    Add headers to both force latest IE rendering engine or Chrome Frame,
+    and also to cache the rendered page for 10 minutes.
+    """
+    r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    r.headers["Pragma"] = "no-cache"
+    r.headers["Expires"] = "0"
+    r.headers['Cache-Control'] = 'public, max-age=0'
+    return r
 
 
 

@@ -33,8 +33,12 @@ $('#update-btn').on('click',function(){
 
 $('#chart').on('plotly_relayout',function(){
 	var gd = document.getElementById('chart')
-	var xRange = gd.layout.xaxis.range
-	var yRange = gd.layout.yaxis.range
+	var xRange = gd.layout.xaxis.range;
+	var yRange = gd.layout.yaxis.range;
+    var TF_multiselect = $('#TF_drop').val();
+    var cpg_multiselect = $('#cpg_annots').val();
+    var hmm_multiselect = $('#chromhmm').val();
+    var enh_val = $('#enhancers').prop('checked'); /* it will return true or false */
 
 	$.ajax({
         url: "/update_zoom",
@@ -42,8 +46,11 @@ $('#chart').on('plotly_relayout',function(){
         contentType: 'application/json;charset=UTF-8',
         data: {
             'xrange': xRange,
-            'yrange': yRange
-
+            'yrange': yRange,
+            'TF_value': TF_multiselect,
+            'cpg_value': cpg_multiselect,
+            'hmm_value': hmm_multiselect,
+            'enh_val': enh_val
         },
         dataType:"json",
         success: function (data) {
