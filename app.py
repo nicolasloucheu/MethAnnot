@@ -22,6 +22,7 @@ if not os.path.exists(uploads_dir):
  
 @app.route('/', methods = ['POST', 'GET'])
 def home():
+	print(request.form)
 	TF_options = []
 	cpg_options = []
 	hmm_options = []
@@ -32,6 +33,8 @@ def home():
 	ready_to_plot = False
 	start = 0
 	end = 0
+	col_sample = {}
+	col_check_val = 'off'
 	if request.method == "POST" and 'file' in request.files:
 		file = request.files.getlist('file')
 		if len(file) > 1:
@@ -45,6 +48,11 @@ def home():
 	for sample in samples:
 		if request.method == "POST" and f'del_{sample}' in request.form:
 			samples.remove(sample)
+
+		if request.method == "POST" and f'onoffswitch_{sample}' in request.form:
+			col_sample[sample] = "#00f"
+		else:
+			col_sample[sample] = '#297822'
 
 	if request.method == "POST" and 'region-input' in request.form:
 		region = request.form['region-input']
@@ -80,10 +88,12 @@ def home():
 		sub_genes.to_csv('instance/tmp/sub_genes.csv.gz', compression='gzip')
 		df_TF.to_csv('instance/tmp/df_TF.csv.gz', compression='gzip')
 		df_annots.to_csv('instance/tmp/df_annots.csv.gz', compression='gzip')
-		plotly_plot = create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start, end, chrom, None, None, None, None, None, None)
+		plotly_plot = create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start, end, chrom, None, None, None, None, None, None, col_sample)
 	else:
 		plotly_plot = ""
-	return render_template("index.html", samples=samples, region=region, error_region=error_region, region_mes=region_mes, plotly_plot=plotly_plot, ready_to_plot=ready_to_plot, TF_options=TF_options, cpg_options=cpg_options, hmm_options=hmm_options, enh_dis=enh_dis, start=start, end=end)
+
+	print(col_sample)
+	return render_template("index.html", samples=samples, region=region, error_region=error_region, region_mes=region_mes, plotly_plot=plotly_plot, ready_to_plot=ready_to_plot, TF_options=TF_options, cpg_options=cpg_options, hmm_options=hmm_options, enh_dis=enh_dis, start=start, end=end, col_sample=col_sample)
 
 
 @app.route('/update_graph', methods=['GET', 'POST'])

@@ -108,7 +108,7 @@ def create_dfs(chrom, start, end, sample_name):
 
 
 
-def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start, end, chrom, TF_drop, cpg_annots, chromhmm, enhancers, x_range, y_range):
+def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start, end, chrom, TF_drop, cpg_annots, chromhmm, enhancers, x_range, y_range, col_sample):
 
 	start = int(start)
 	end = int(end)
@@ -254,7 +254,7 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 						x = bv_sample[i]['MAPINFO'], 
 						y = bv_sample[i].iloc[:,0],
 						line = dict(
-							color = 'blue',
+							color = col_sample[bv_sample[i].columns[0]],
 							width = 2
 						),
 						name = f"{bv_sample[i].columns[0]}",

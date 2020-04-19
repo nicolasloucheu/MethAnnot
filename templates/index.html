@@ -41,9 +41,18 @@
 									{% for sample in samples %}
 										<li class="drop_item">
 											<button class="btn btn-danger btn-circle btn-circle-sm m-1" name="del_{{sample}}" type="submit"><i class="fa fa-trash-o"></i></button>
-												{{sample}}
-												<input type='radio' name="gender"/> Blue
-												<input type='radio' name="gender"/> Green
+											{{sample}}
+											<div class="onoffswitch ml-4">
+												{% if col_sample[sample] == '#00f' %}
+													<input type="checkbox" name="onoffswitch_{{sample}}" class="onoffswitch-checkbox" id="myonoffswitch_{{sample}}" checked>
+												{% else %}
+													<input type="checkbox" name="onoffswitch_{{sample}}" class="onoffswitch-checkbox" id="myonoffswitch_{{sample}}">
+												{% endif %}
+												<label class="onoffswitch-label" for="myonoffswitch_{{sample}}">
+													<span class="onoffswitch-inner"></span>
+													<span class="onoffswitch-switch"></span>
+												</label>
+											</div>
 										</li>
 									{% endfor %}
 								</ul>
