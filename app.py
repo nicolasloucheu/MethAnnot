@@ -22,7 +22,6 @@ if not os.path.exists(uploads_dir):
  
 @app.route('/', methods = ['POST', 'GET'])
 def home():
-	print(request.form)
 	TF_options = []
 	cpg_options = []
 	hmm_options = []
@@ -82,6 +81,7 @@ def home():
 		session['start'] = start
 		session['end'] = end
 		session['samples'] = samples
+		session['col_sample'] = col_sample
 		bv_means_controls.to_csv('instance/tmp/bv_means_controls.csv.gz', compression='gzip')
 		bv_json = [i.to_json(orient='split') for i in bv_sample]
 		pickle.dump(bv_json, open("instance/tmp/bv_json.p", "wb"))
@@ -92,7 +92,6 @@ def home():
 	else:
 		plotly_plot = ""
 
-	print(col_sample)
 	return render_template("index.html", samples=samples, region=region, error_region=error_region, region_mes=region_mes, plotly_plot=plotly_plot, ready_to_plot=ready_to_plot, TF_options=TF_options, cpg_options=cpg_options, hmm_options=hmm_options, enh_dis=enh_dis, start=start, end=end, col_sample=col_sample)
 
 
@@ -102,11 +101,16 @@ def change_features():
 	start = session.get('start', None)
 	end = session.get('end', None)
 	samples = session.get('samples', None)
+	col_sample = session.get('col_sample', None)
 	bv_means_controls = pd.read_csv('instance/tmp/bv_means_controls.csv.gz', compression='gzip')
 	bv_sample = [pd.read_json(i, orient='split') for i in pickle.load(open("instance/tmp/bv_json.p", "rb"))]
 	sub_genes = pd.read_csv('instance/tmp/sub_genes.csv.gz', compression='gzip')
 	df_TF = pd.read_csv('instance/tmp/df_TF.csv.gz', compression='gzip')
 	df_annots = pd.read_csv('instance/tmp/df_annots.csv.gz', compression='gzip')
+
+	x_range = [float(i) for i in request.args.getlist('xrange[]')]
+	y_range = [float(i) for i in request.args.getlist('yrange[]')]
+
 	TF_value = request.args.getlist('TF_value[]')
 	cpg_value = request.args.getlist('cpg_value[]')
 	hmm_value = request.args.getlist('hmm_value[]')
@@ -115,7 +119,7 @@ def change_features():
 	session['cpg_value'] = cpg_value
 	session['hmm_value'] = hmm_value
 	session['enh_val'] = enh_val
-	graphJSON= create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start, end, chrom, TF_value, cpg_value, hmm_value, enh_val, None, None)
+	graphJSON= create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start, end, chrom, TF_value, cpg_value, hmm_value, enh_val, x_range, y_range, col_sample)
 	return graphJSON
 
 @app.route('/update_zoom', methods=['GET', 'POST'])
@@ -124,6 +128,7 @@ def change_zoom():
 	start = session.get('start', None)
 	end = session.get('end', None)
 	samples = session.get('samples', None)
+	col_sample = session.get('col_sample', None)
 	bv_means_controls = pd.read_csv('instance/tmp/bv_means_controls.csv.gz', compression='gzip')
 	bv_sample = [pd.read_json(i, orient='split') for i in pickle.load(open("instance/tmp/bv_json.p", "rb"))]
 	sub_genes = pd.read_csv('instance/tmp/sub_genes.csv.gz', compression='gzip')
@@ -143,9 +148,41 @@ def change_zoom():
 	session['cpg_value'] = cpg_value
 	session['hmm_value'] = hmm_value
 	session['enh_val'] = enh_val
-	print(request.args)
-	graphJSON= create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start, end, chrom, TF_value, cpg_value, hmm_value, enh_val, x_range, y_range)
+	graphJSON= create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start, end, chrom, TF_value, cpg_value, hmm_value, enh_val, x_range, y_range, col_sample)
 	return graphJSON
+
+
+@app.route('/update_color', methods=['GET', 'POST'])
+def change_color():
+	chrom = session.get('chrom', None)
+	start = session.get('start', None)
+	end = session.get('end', None)
+	samples = session.get('samples', None)
+	col_sample = session.get('col_sample', None)
+	bv_means_controls = pd.read_csv('instance/tmp/bv_means_controls.csv.gz', compression='gzip')
+	bv_sample = [pd.read_json(i, orient='split') for i in pickle.load(open("instance/tmp/bv_json.p", "rb"))]
+	sub_genes = pd.read_csv('instance/tmp/sub_genes.csv.gz', compression='gzip')
+	df_TF = pd.read_csv('instance/tmp/df_TF.csv.gz', compression='gzip')
+	df_annots = pd.read_csv('instance/tmp/df_annots.csv.gz', compression='gzip')
+	TF_value = session.get('TF_value', None)
+	cpg_value = session.get('cpg_value', None)
+	hmm_value = session.get('hmm_value', None)
+	enh_val = session.get('enh_val', None)
+
+	x_range = [float(i) for i in request.args.getlist('xrange[]')]
+	y_range = [float(i) for i in request.args.getlist('yrange[]')]
+
+	color_sample = (request.args['color'])
+	id_checkbox = request.args['id_checkbox'].split('switch_')[-1]
+	col_sample[id_checkbox] = color_sample
+	session['col_sample'] = col_sample
+
+	graphJSON = create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start, end, chrom, TF_value, cpg_value, hmm_value, enh_val, x_range, y_range, col_sample)
+	return graphJSON
+
+
+
+
 
 @app.after_request
 def add_header(r):

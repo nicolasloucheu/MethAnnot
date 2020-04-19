@@ -44,9 +44,9 @@
 											{{sample}}
 											<div class="onoffswitch ml-4">
 												{% if col_sample[sample] == '#00f' %}
-													<input type="checkbox" name="onoffswitch_{{sample}}" class="onoffswitch-checkbox" id="myonoffswitch_{{sample}}" checked>
+													<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch_{{sample}}" checked>
 												{% else %}
-													<input type="checkbox" name="onoffswitch_{{sample}}" class="onoffswitch-checkbox" id="myonoffswitch_{{sample}}">
+													<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch_{{sample}}">
 												{% endif %}
 												<label class="onoffswitch-label" for="myonoffswitch_{{sample}}">
 													<span class="onoffswitch-inner"></span>
@@ -279,6 +279,7 @@
 				]
 			}
 		);
+
 		var graphs = {{plotly_plot | safe}};
 		Plotly.newPlot(chart, graphs, {})
 	</script>
