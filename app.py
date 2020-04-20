@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, jsonify
 import json
 import plotly
 import plotly.offline as py
@@ -172,7 +172,7 @@ def change_color():
 	x_range = [float(i) for i in request.args.getlist('xrange[]')]
 	y_range = [float(i) for i in request.args.getlist('yrange[]')]
 
-	color_sample = (request.args['color'])
+	color_sample = request.args['color']
 	id_checkbox = request.args['id_checkbox'].split('switch_')[-1]
 	col_sample[id_checkbox] = color_sample
 	session['col_sample'] = col_sample
@@ -182,20 +182,31 @@ def change_color():
 
 
 
+@app.route('/update_region', methods = ['GET', 'POST'])
+def change_region():
+	new_start = request.args['start']
+	new_end = request.args['end']
+	chrom = session.get('chrom', None)
+	samples = session.get('samples', None)
+	col_sample = session.get('col_sample', None)
+	session['TF_value'] = None
+	session['cpg_value'] = None
+	session['hmm_value'] = None
+	session['enh_val'] = None
 
+	session['start'] = new_start
+	session['end'] = new_end
 
-@app.after_request
-def add_header(r):
-    """
-    Add headers to both force latest IE rendering engine or Chrome Frame,
-    and also to cache the rendered page for 10 minutes.
-    """
-    r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    r.headers["Pragma"] = "no-cache"
-    r.headers["Expires"] = "0"
-    r.headers['Cache-Control'] = 'public, max-age=0'
-    return r
+	TF_options, cpg_options, hmm_options, enh_dis, bv_means_controls, bv_sample, sub_genes, df_TF, df_annots = create_dfs(chrom, new_start, new_end, samples)
+	bv_means_controls.to_csv('instance/tmp/bv_means_controls.csv.gz', compression='gzip')
+	bv_json = [i.to_json(orient='split') for i in bv_sample]
+	pickle.dump(bv_json, open("instance/tmp/bv_json.p", "wb"))
+	sub_genes.to_csv('instance/tmp/sub_genes.csv.gz', compression='gzip')
+	df_TF.to_csv('instance/tmp/df_TF.csv.gz', compression='gzip')
+	df_annots.to_csv('instance/tmp/df_annots.csv.gz', compression='gzip')
+	graphJSON = create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, new_start, new_end, chrom, None, None, None, None, None, None, col_sample)
 
+	return graphJSON
 
 
 

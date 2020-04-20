@@ -25,7 +25,7 @@
 				<h3>Visualizing DNA methylation sequencing data</h3>
 			</div>
 			<div class="user-input">
-				<section>
+				<section class="shift-all">
 					<p>
 						<strong>Select a sample</strong>
 					</p>
@@ -60,16 +60,26 @@
 						</ul>
 					{% endif %}
 				</section>
-				<section>
+				<section class="shift-all">
 					<p>
 						<strong>Select a region</strong>
 					</p>
-					<input type="text" name="region-input" autofocus placeholder="Sample name" value="{{region}}" class="{{error_region}}">
+					<input type="text" name="region-input" autofocus placeholder="Region" value="{{region}}" class="{{error_region}}" id="region-input">
 					{% if region_mes|length > 0 %}
 						<p>{{region_mes}}</p>
 					{% endif %}
 				</section>
-				<section>
+				<section class="shift-all">
+					<p>
+						<strong>Shift region by (bp)</strong>
+					</p>
+					<div>
+						<a href="#" class="shift round" id="shift-left">&#8249;</a>
+						<input type="number" name="region-change" autofocus placeholder="Number bp" class="shift-input" step=1000 value=1000 id="region-shift">
+						<a href="#" class="shift round" id="shift-right">&#8250;</a>
+					</div>
+				</section>
+				<section class="shift-all">
 					<input type="hidden" name="_method" value="plot">
 					<input type="submit" value="plot" class="button-plot">
 				</section>
@@ -222,7 +232,7 @@
 							<div class="plottin-header">
 								<h2 class="h6 text-uppercase mb-0">Some text i will want to add when the plot is not ready</h2>
 							</div>
-							<div class="plottin-body-not">Some explanations, like where do the samples have to look like, where they have to come from + link to SampleAnalysis tool</div>
+							<div class="plottin-body-not">Some explanations, like how do the samples have to look like, where they have to come from + link to SampleAnalysis tool</div>
 						</div>
 					</div>
 				</div>
@@ -231,20 +241,24 @@
 	</div>
 
 
+
 	
 	
 	<!-- JS Bootstrap -->
 	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/bootstrap-select.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/i18n/defaults-*.min.js"></script>
+	
+
 	<!-- Plotly JS -->
 	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.1/d3.min.js"></script>
 	<script src="{{ url_for('static', filename='js/jquery-1.11.1.min.js') }}"></script>
 	<!-- Own js script -->
-	<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+	
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+<!-- 	<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/i18n/defaults-*.min.js"></script> -->
 	<script type="text/javascript">
 		var start = {{start | safe}};
 		var end = {{end | safe}};
@@ -265,7 +279,7 @@
 						'autoScale2d',
 						{
 							name: 'myResetScale2d',
-							title: 'Reset axes',
+							title: 'Reset axes lol ',
 							icon: Plotly.Icons.home,
 							click: function(gd) {
 								Plotly.relayout(gd, 'xaxis.range', [start, end])
@@ -284,6 +298,8 @@
 		Plotly.newPlot(chart, graphs, {})
 	</script>
 	
+	<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </body>
 
 

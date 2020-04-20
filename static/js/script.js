@@ -12,7 +12,13 @@ $('#update-btn').on('click',function(){
 	var TF_multiselect = $('#TF_drop').val();
 	var cpg_multiselect = $('#cpg_annots').val();
 	var hmm_multiselect = $('#chromhmm').val();
-	var enh_val = $('#enhancers').prop('checked'); /* it will return true or false */
+
+    if ($('#enhancers').prop('checked') == null) {
+        var enh_val = false
+    }
+    else {
+        var enh_val = $('#enhancers').prop('checked')
+    }
 
     $.ajax({
         url: "/update_graph",
@@ -32,7 +38,6 @@ $('#update-btn').on('click',function(){
             Plotly.newPlot('chart', data);
         }
     });
-    $('#TF_drop').selectpicker('refresh');
 })
 
 
@@ -43,7 +48,13 @@ $('#chart').on('plotly_relayout',function(){
     var TF_multiselect = $('#TF_drop').val();
     var cpg_multiselect = $('#cpg_annots').val();
     var hmm_multiselect = $('#chromhmm').val();
-    var enh_val = $('#enhancers').prop('checked'); /* it will return true or false */
+    
+    if ($('#enhancers').prop('checked') == null) {
+        var enh_val = false
+    }
+    else {
+        var enh_val = $('#enhancers').prop('checked')
+    }
 
 	$.ajax({
         url: "/update_zoom",
@@ -96,4 +107,81 @@ $('input:checkbox').on('click', function(){
         }
     });
 
+});
+
+
+
+$('#shift-left').on('click', function() {
+    var region = document.getElementById('region-input').value
+    var shift = document.getElementById('region-shift').value
+
+
+    if ( region && shift ) {
+        var chrom = region.split(":")[0]
+        var start = region.split(":")[1].split("-")[0]
+        var end = region.split(":")[1].split("-")[1]
+
+        var new_start = parseInt(start) - parseInt(shift)
+        var new_end = parseInt(end) - parseInt(shift)
+
+        $("#region-input").val(chrom + ":" + new_start + "-" + new_end)
+
+        $(".selectpicker").selectpicker();
+        $('.selectpicker').val(null)
+        $('.selectpicker').selectpicker('refresh');
+
+        $.ajax({
+            url: "update_region",
+            type:'GET',
+            contentType: 'application/json;charset=UTF-8',
+            data: {
+                "chrom": chrom,
+                "start": new_start,
+                'end': new_end
+            },
+            dataType:"json",
+            success: function (data) {
+                Plotly.newPlot('chart', data);
+            }
+        });
+    }
+});
+
+
+
+
+$('#shift-right').on('click', function() {
+    var region = document.getElementById('region-input').value
+    var shift = document.getElementById('region-shift').value
+
+
+    if ( region && shift ) {
+        var chrom = region.split(":")[0]
+        var start = region.split(":")[1].split("-")[0]
+        var end = region.split(":")[1].split("-")[1]
+
+        var new_start = parseInt(start) + parseInt(shift)
+        var new_end = parseInt(end) + parseInt(shift)
+
+        $("#region-input").val(chrom + ":" + new_start + "-" + new_end)
+
+        $(".selectpicker").selectpicker();
+        $('.selectpicker').val(null)
+        $('.selectpicker').selectpicker('refresh');
+        
+        $.ajax({
+            url: "update_region",
+            type:'GET',
+            contentType: 'application/json;charset=UTF-8',
+            data: {
+                "chrom": chrom,
+                "start": new_start,
+                'end': new_end
+            },
+            dataType:"json",
+            success: function (data) {
+                Plotly.newPlot('chart', data);
+            }
+        });
+    }
 });

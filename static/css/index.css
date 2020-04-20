@@ -482,3 +482,35 @@ section.dashboard-drops div[class*='col-']:last-of-type .item {
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
 	right: 0px; 
 }
+
+
+/*SWITCH REGION*/
+
+.shift {
+  background-color: #468499;
+  color: white;
+  text-align: center;
+}
+
+.round {
+  border-radius: 50%;
+  height: 25px;
+  width: 25px;
+}
+
+input[type="number"].shift-input {
+	background: #f8f8f8;
+	border: none;
+	box-shadow: none;
+	display: inline;
+	font-family: 'Lato', sans-serif;
+	font-size: 0.8rem;
+	margin-bottom: 40px;
+	padding: 0.5em;
+	transition: background 0.2s;
+	width: 40%;
+}
+
+.shift-all {
+	text-align: center;
+}
