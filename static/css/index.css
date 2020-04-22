@@ -502,3 +502,9 @@ input[type="number"].shift-input {
 .shift-all {
 	text-align: center;
 }
+
+/*QUESTION mARK*/
+
+.question-mark {
+	margin-left: 40px;
+}

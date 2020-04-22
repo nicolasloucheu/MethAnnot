@@ -1,3 +1,7 @@
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();   
+});
+
 $(function() {
 	// Sidebar toggle behavior
 	$('#toggle-btn').on('click', function() {

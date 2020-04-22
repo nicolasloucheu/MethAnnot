@@ -28,6 +28,7 @@
 				<section class="shift-all">
 					<p>
 						<strong>Select a sample</strong>
+						<i class="question-mark fa fa-question-circle" data-toggle="tooltip" title="Add the entire directory created by the SampleAnalysis tool. This directory should contain 48 files (for each chromosome: one containing the beta-values of the sample and another containing the index of the data"></i>
 					</p>
 					<input class="f-input" type="file" name="file" webkitdirectory mutliple/>
 					<input type="submit" value="add sample" class="query-but"/>
@@ -63,6 +64,7 @@
 				<section class="shift-all">
 					<p>
 						<strong>Select a region</strong>
+						<i class="question-mark fa fa-question-circle" data-toggle="tooltip" title="The region should be entered as a text input (chr{chromosome}:{start}-{end}. Example: chr8-60,000,000-61,000,000). The commas are not mandatory."></i>
 					</p>
 					<input type="text" name="region-input" autofocus placeholder="Region" value="{{region}}" class="{{error_region}}" id="region-input">
 					{% if region_mes|length > 0 %}
@@ -72,6 +74,7 @@
 				<section class="shift-all">
 					<p>
 						<strong>Shift region by (bp)</strong>
+						<i class="question-mark fa fa-question-circle" data-toggle="tooltip" title="Enter the number of bp to shift and click on an arrow"></i>
 					</p>
 					<div>
 						<a href="#" class="shift round" id="shift-left">&#8249;</a>
@@ -230,9 +233,11 @@
 					<div class="col-lg-12">
 						<div class="plottin">
 							<div class="plottin-header">
-								<h2 class="h6 text-uppercase mb-0">Some text i will want to add when the plot is not ready</h2>
+								<h2 class="h6 text-uppercase mb-0">DNA methylation annotations visualiztion tool</h2>
 							</div>
-							<div class="plottin-body-not">Some explanations, like how do the samples have to look like, where they have to come from + link to SampleAnalysis tool</div>
+							<div class="plottin-body-not" >The samples files have to be made by the SampleAnalysis tool. This tool accepts raw data from Illumina Infinium sequencing platforms and outputs a QC report, as well as some graphs comparing the data with control samples. All the information about that tool can be accessed <a href="#" target="_blank">here</a> (I'll update with a link to the tool). </div>
+							<div class="plottin-body-not" >This tool has been made to visualize the DNA methylation data sequenced by Illumina Infinium platforms. You can see informations like beta-values from controls, transcription factor binding sites, CpG situations (islands, shores, shelves, inter-islands), chromatin conformation or enhancers locations.</div>
+							<br>
 						</div>
 					</div>
 				</div>
