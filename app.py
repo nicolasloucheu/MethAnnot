@@ -92,6 +92,8 @@ def home():
 	else:
 		plotly_plot = ""
 
+	print(plotly_plot)
+
 	return render_template("index.html", samples=samples, region=region, error_region=error_region, region_mes=region_mes, plotly_plot=plotly_plot, ready_to_plot=ready_to_plot, TF_options=TF_options, cpg_options=cpg_options, hmm_options=hmm_options, enh_dis=enh_dis, start=start, end=end, col_sample=col_sample)
 
 

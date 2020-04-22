@@ -603,7 +603,18 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 	#         hovermode='x unified'
 		)
 
-	graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-	# div = pyo.plot(fig, show_link=False, output_type="div", include_plotlyjs=False)
+	config = {
+		'config': {
+			"start": start,
+			"end": end
+		}
+	}
+
+	graph = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+	graph_comp = json.loads(graph)
+
+	graph_comp.update(config)
+
+	graphJSON = json.dumps(graph_comp)
 
 	return graphJSON
