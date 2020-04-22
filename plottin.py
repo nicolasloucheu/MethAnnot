@@ -612,9 +612,7 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 
 	graph = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 	graph_comp = json.loads(graph)
-
 	graph_comp.update(config)
-
 	graphJSON = json.dumps(graph_comp)
 
 	return graphJSON

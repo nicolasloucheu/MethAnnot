@@ -190,9 +190,9 @@
 								<div class="checkbox">
 									<div class="title enh-title">
 										{% if enh_dis %}
-											<label><input type="checkbox" value="" disabled> Enhancers</label>
+											<label><input type="checkbox" value="" disabled='true' class="enhancers"> Enhancers</label>
 										{% else %}
-											<label><input type="checkbox" value="" id="enhancers"> Enhancers</label>
+											<label><input type="checkbox" value="" class="enhancers"> Enhancers</label>
 										{% endif %}
 									</div>
 								</div>
@@ -268,25 +268,18 @@
 					'toImage',
 				],
 				[
-					'zoom2d',
-					'pan2d',
 					'zoomIn2d',
 					'zoomOut2d',
 				],
 				[
-					'autoScale2d',
 					{
 						name: 'myResetScale2d',
-						title: 'Reset axes perso',
+						title: 'Reset axes',
 						icon: Plotly.Icons.home,
 						click: function(gd) {
 							Plotly.relayout(gd, 'xaxis.range', [graphs.config.start, graphs.config.end])
 						}
 					}	
-				],
-				[
-					'hoverClosestCartesian',
-					'hoverCompareCartesian'
 				]
 			]
 		}

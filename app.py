@@ -92,8 +92,6 @@ def home():
 	else:
 		plotly_plot = ""
 
-	print(plotly_plot)
-
 	return render_template("index.html", samples=samples, region=region, error_region=error_region, region_mes=region_mes, plotly_plot=plotly_plot, ready_to_plot=ready_to_plot, TF_options=TF_options, cpg_options=cpg_options, hmm_options=hmm_options, enh_dis=enh_dis, start=start, end=end, col_sample=col_sample)
 
 
@@ -200,13 +198,20 @@ def change_region():
 	session['end'] = new_end
 
 	TF_options, cpg_options, hmm_options, enh_dis, bv_means_controls, bv_sample, sub_genes, df_TF, df_annots = create_dfs(chrom, new_start, new_end, samples)
+
+	options_dict = {"TF_options": TF_options, "cpg_options": cpg_options, "hmm_options": hmm_options, "enh_dis": enh_dis}
+
 	bv_means_controls.to_csv('instance/tmp/bv_means_controls.csv.gz', compression='gzip')
 	bv_json = [i.to_json(orient='split') for i in bv_sample]
 	pickle.dump(bv_json, open("instance/tmp/bv_json.p", "wb"))
 	sub_genes.to_csv('instance/tmp/sub_genes.csv.gz', compression='gzip')
 	df_TF.to_csv('instance/tmp/df_TF.csv.gz', compression='gzip')
 	df_annots.to_csv('instance/tmp/df_annots.csv.gz', compression='gzip')
-	graphJSON = create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, new_start, new_end, chrom, None, None, None, None, None, None, col_sample)
+	plotly_plot = create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, new_start, new_end, chrom, None, None, None, None, None, None, col_sample)
+
+	graphs = json.loads(plotly_plot)
+	graphs.update(options_dict)
+	graphJSON = json.dumps(graphs)
 
 	return graphJSON
 
