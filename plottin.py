@@ -194,6 +194,7 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 				hovertemplate = 'Beta-value: %{y:.2f}<br>Position: %{x}<br>CpG name: %{customdata}'
 			)
 		)
+		print(bv_means_controls)
 
 		fig.add_trace(
 			go.Scatter(

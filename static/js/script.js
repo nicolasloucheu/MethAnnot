@@ -1,7 +1,3 @@
-
-
-
-
 $(function() {
 	// Sidebar toggle behavior
 	$('#toggle-btn').on('click', function() {

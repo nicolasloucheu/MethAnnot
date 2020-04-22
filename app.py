@@ -102,11 +102,11 @@ def change_features():
 	end = session.get('end', None)
 	samples = session.get('samples', None)
 	col_sample = session.get('col_sample', None)
-	bv_means_controls = pd.read_csv('instance/tmp/bv_means_controls.csv.gz', compression='gzip')
+	bv_means_controls = pd.read_csv('instance/tmp/bv_means_controls.csv.gz', index_col=0, compression='gzip')
 	bv_sample = [pd.read_json(i, orient='split') for i in pickle.load(open("instance/tmp/bv_json.p", "rb"))]
-	sub_genes = pd.read_csv('instance/tmp/sub_genes.csv.gz', compression='gzip')
-	df_TF = pd.read_csv('instance/tmp/df_TF.csv.gz', compression='gzip')
-	df_annots = pd.read_csv('instance/tmp/df_annots.csv.gz', compression='gzip')
+	sub_genes = pd.read_csv('instance/tmp/sub_genes.csv.gz', index_col=0, compression='gzip')
+	df_TF = pd.read_csv('instance/tmp/df_TF.csv.gz', index_col=0, compression='gzip')
+	df_annots = pd.read_csv('instance/tmp/df_annots.csv.gz', index_col=0, compression='gzip')
 
 	x_range = [float(i) for i in request.args.getlist('xrange[]')]
 	y_range = [float(i) for i in request.args.getlist('yrange[]')]
@@ -129,11 +129,11 @@ def change_zoom():
 	end = session.get('end', None)
 	samples = session.get('samples', None)
 	col_sample = session.get('col_sample', None)
-	bv_means_controls = pd.read_csv('instance/tmp/bv_means_controls.csv.gz', compression='gzip')
+	bv_means_controls = pd.read_csv('instance/tmp/bv_means_controls.csv.gz', index_col=0, compression='gzip')
 	bv_sample = [pd.read_json(i, orient='split') for i in pickle.load(open("instance/tmp/bv_json.p", "rb"))]
-	sub_genes = pd.read_csv('instance/tmp/sub_genes.csv.gz', compression='gzip')
-	df_TF = pd.read_csv('instance/tmp/df_TF.csv.gz', compression='gzip')
-	df_annots = pd.read_csv('instance/tmp/df_annots.csv.gz', compression='gzip')
+	sub_genes = pd.read_csv('instance/tmp/sub_genes.csv.gz', index_col=0, compression='gzip')
+	df_TF = pd.read_csv('instance/tmp/df_TF.csv.gz', index_col=0, compression='gzip')
+	df_annots = pd.read_csv('instance/tmp/df_annots.csv.gz', index_col=0, compression='gzip')
 	TF_value = session.get('TF_value', None)
 	cpg_value = session.get('cpg_value', None)
 	hmm_value = session.get('hmm_value', None)
@@ -159,11 +159,11 @@ def change_color():
 	end = session.get('end', None)
 	samples = session.get('samples', None)
 	col_sample = session.get('col_sample', None)
-	bv_means_controls = pd.read_csv('instance/tmp/bv_means_controls.csv.gz', compression='gzip')
+	bv_means_controls = pd.read_csv('instance/tmp/bv_means_controls.csv.gz', index_col=0, compression='gzip')
 	bv_sample = [pd.read_json(i, orient='split') for i in pickle.load(open("instance/tmp/bv_json.p", "rb"))]
-	sub_genes = pd.read_csv('instance/tmp/sub_genes.csv.gz', compression='gzip')
-	df_TF = pd.read_csv('instance/tmp/df_TF.csv.gz', compression='gzip')
-	df_annots = pd.read_csv('instance/tmp/df_annots.csv.gz', compression='gzip')
+	sub_genes = pd.read_csv('instance/tmp/sub_genes.csv.gz', index_col=0, compression='gzip')
+	df_TF = pd.read_csv('instance/tmp/df_TF.csv.gz', index_col=0, compression='gzip')
+	df_annots = pd.read_csv('instance/tmp/df_annots.csv.gz', index_col=0, compression='gzip')
 	TF_value = session.get('TF_value', None)
 	cpg_value = session.get('cpg_value', None)
 	hmm_value = session.get('hmm_value', None)
@@ -201,12 +201,12 @@ def change_region():
 
 	options_dict = {"TF_options": TF_options, "cpg_options": cpg_options, "hmm_options": hmm_options, "enh_dis": enh_dis}
 
-	bv_means_controls.to_csv('instance/tmp/bv_means_controls.csv.gz', compression='gzip')
+	bv_means_controls.to_csv('instance/tmp/bv_means_controls.csv.gz', index_col=0, compression='gzip')
 	bv_json = [i.to_json(orient='split') for i in bv_sample]
 	pickle.dump(bv_json, open("instance/tmp/bv_json.p", "wb"))
-	sub_genes.to_csv('instance/tmp/sub_genes.csv.gz', compression='gzip')
-	df_TF.to_csv('instance/tmp/df_TF.csv.gz', compression='gzip')
-	df_annots.to_csv('instance/tmp/df_annots.csv.gz', compression='gzip')
+	sub_genes.to_csv('instance/tmp/sub_genes.csv.gz', index_col=0, compression='gzip')
+	df_TF.to_csv('instance/tmp/df_TF.csv.gz', index_col=0, compression='gzip')
+	df_annots.to_csv('instance/tmp/df_annots.csv.gz', index_col=0, compression='gzip')
 	plotly_plot = create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, new_start, new_end, chrom, None, None, None, None, None, None, col_sample)
 
 	graphs = json.loads(plotly_plot)
