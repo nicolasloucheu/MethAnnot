@@ -1,14 +1,17 @@
+// TOOLTIPS
 $(document).ready(function(){
     $('[data-toggle="tooltip"]').tooltip();   
 });
 
+// Sidebar toggle behavior
 $(function() {
-	// Sidebar toggle behavior
 	$('#toggle-btn').on('click', function() {
 		$('#sidebar, #content').toggleClass('active');
 	});
 });
 
+
+//Graph update when changing annotations
 $('#update-btn').on('click',function(){
 	var gd = document.getElementById('chart')
 	var xRange = gd.layout.xaxis.range;
@@ -70,6 +73,7 @@ $('#update-btn').on('click',function(){
 })
 
 
+//Graph update when touching the graph (changing zoom, moving)
 $('#chart').on('plotly_relayout',function(){
 	var gd = document.getElementById('chart')
 	var xRange = gd.layout.xaxis.range;
@@ -130,6 +134,7 @@ $('#chart').on('plotly_relayout',function(){
 })
 
 
+//Graph update when changing color of a sample
 $('.onoffswitch-checkbox:checkbox').on('click', function(){
 	var gd = document.getElementById('chart')
 	var xRange = gd.layout.xaxis.range;
@@ -190,6 +195,7 @@ $('.onoffswitch-checkbox:checkbox').on('click', function(){
 
 
 
+//Graph update when shifting to the left
 $('#shift-left').on('click', function() {
 	var region = document.getElementById('region-input').value
 	var shift = document.getElementById('region-shift').value
@@ -280,7 +286,7 @@ $('#shift-left').on('click', function() {
 
 
 
-
+//Graph update when shifting to the right
 $('#shift-right').on('click', function() {
 	var region = document.getElementById('region-input').value
 	var shift = document.getElementById('region-shift').value

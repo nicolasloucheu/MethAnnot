@@ -7,10 +7,12 @@ import pickle
 import plotly.offline as pyo
 
 
-
+# Create the dataframes from region information and sample paths
 def create_dfs(chrom, start, end, sample_name):
 	start = int(start)
 	end = int(end)
+
+	# Getting indices to import only the data in the wanted region
 	with open(f"static/data/chrom_lists/chrom_{chrom}_lst.txt", 'rb') as fp:
 		chrom_list_controls = pickle.load(fp)
 	ind_controls = [i for i, x in enumerate(chrom_list_controls) if (x >= start and x <= end)]
@@ -24,7 +26,11 @@ def create_dfs(chrom, start, end, sample_name):
 		annots_index = pickle.load(fp)
 	ind_annots = [i for i, x in enumerate(annots_index) if (x >= start and x <= end)]
 
+	# Prop_len will be a dynamic variable defining the length of the current x-axis so that object sizes will vary depending on that length. 
+	# They will not be too big nor too small (example: triangles showing the direction of genes have to vary depending on the length of the x-axis)
 	prop_len = (end-start)/60
+
+	# If there are beta-values of controls, import those values, else import an empty dataframe
 	if len(ind_controls) > 0:
 		bv_means_controls = pd.read_csv(f"static/data/chrom_means/chrom_{chrom}_means.csv.gz", 
 										compression="gzip", index_col=0, skiprows = range(1, ind_controls[0]+1), nrows = (ind_controls[-1]-ind_controls[0]+1))
@@ -32,6 +38,7 @@ def create_dfs(chrom, start, end, sample_name):
 		bv_means_controls = pd.DataFrame()
 
 
+	# For each sample, if there are beta-values, import them, else import an empty dataframe
 	bv_sample = []
 	for sample_value in sample_name:
 		with open(f"instance/uploads/{sample_value}/{sample_value}_chrom_{chrom}_lst.txt", 'rb') as fp:
@@ -39,9 +46,10 @@ def create_dfs(chrom, start, end, sample_name):
 		ind_sample = [i for i, x in enumerate(chrom_list_sample) if (x >= start and x <= end)]
 		if len(ind_sample) > 0:
 			bv_sample.append(pd.read_csv(f"instance/uploads/{sample_value}/{sample_value}_chrom_{chrom}.csv.gz", compression='gzip', index_col=0, skiprows = range(1, ind_sample[0]+1), nrows = (ind_sample[-1]-ind_sample[0]+1)))
+		else:
+			bv_sample.append(pd.DataFrame())
 
-	#genes import
-	
+	# Genes import and parsing so the genes don't overlap (depending on prop_len)
 	if len(ind_genes) > 0:
 		df_genes = pd.read_csv(f"static/data/genes/genes_{chrom}.csv.gz", compression='gzip', skiprows = range(1, ind_genes[0]+1), nrows = (ind_genes[-1]-ind_genes[0]+1), usecols=['external_gene_name', 'START', 'END', 'STRAND'])
 	
@@ -76,13 +84,14 @@ def create_dfs(chrom, start, end, sample_name):
 		df_genes = pd.DataFrame()
 		sub_genes = pd.DataFrame()
 	
-	#TF import
+
+	# TFBS import
 	if len(ind_TF) > 0:
 		df_TF = pd.read_csv(f"static/data/TF_pos/TF_{chrom}.csv.gz", compression='gzip', skiprows = range(1, ind_TF[0]+1), nrows = (ind_TF[-1]-ind_TF[0]+1), index_col=0, keep_default_na=False)
 	else:
 		df_TF = pd.DataFrame()
 	
-	#Annots import
+	# Other annotations import
 	if len(ind_annots) > 0:
 		df_annots = pd.read_csv(f"static/data/annots_pos/annots_chr_{chrom}.csv.gz", compression='gzip', skiprows = range(1, ind_annots[0]+1), nrows = (ind_annots[-1]-ind_annots[0]+1), index_col=0, keep_default_na=False)
 	else:
@@ -112,7 +121,9 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 
 	start = int(start)
 	end = int(end)
-	if bv_means_controls.empty or sub_genes.empty or len(bv_sample) == 0:
+
+	# If there are no controls, no genes or no samples in the region, the figure will be empty and range from start to end
+	if bv_means_controls.empty and sub_genes.empty and len(bv_sample) == 0:
 		fig = go.Figure(
 			layout = dict(
 				xaxis = dict(
@@ -120,15 +131,25 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 				)
 			)
 		)
+		len_drops = 0
+
+	# If at least one of them is not empty, it will generate a figure
 	else:
+		# Defining the range of the plot if the user zoomd/moved or not
 		range_plot = [0, 0]
 		if x_range != None and y_range != None:
 			range_plot = x_range
 		else:
 			range_plot[0] = start
 			range_plot[1] = end
+
+		# Redefining prop_len depending on the zoom
 		prop_len = (range_plot[1] - range_plot[0])/60
+
+		# Create the figure
 		fig = go.Figure()
+
+		# Adding trace for percentile 1% of controls
 		fig.add_trace(
 			go.Scatter(
 				x = bv_means_controls['MAPINFO'],
@@ -141,6 +162,7 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 			)
 		)
 
+		#Adding trace for percentile 5% of controls
 		fig.add_trace(
 			go.Scatter(
 				x = bv_means_controls['MAPINFO'],
@@ -154,6 +176,7 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 			)
 		)
 
+		#Adding trace for percentile 10% of controls
 		fig.add_trace(
 			go.Scatter(
 				x = bv_means_controls['MAPINFO'],
@@ -167,6 +190,7 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 			)
 		)
 
+		#Adding trace for percentile 25% of controls
 		fig.add_trace(
 			go.Scatter(
 				x = bv_means_controls['MAPINFO'],
@@ -180,6 +204,7 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 			)
 		)
 
+		#Adding trace for mean of controls
 		fig.add_trace(
 			go.Scatter(
 				x = bv_means_controls['MAPINFO'],
@@ -195,6 +220,7 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 			)
 		)
 
+		#Adding trace for percentile 75% of controls
 		fig.add_trace(
 			go.Scatter(
 				x = bv_means_controls['MAPINFO'],
@@ -208,6 +234,7 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 			)
 		)
 
+		#Adding trace for percentile 90% of controls
 		fig.add_trace(
 			go.Scatter(
 				x = bv_means_controls['MAPINFO'],
@@ -221,6 +248,7 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 			)
 		)
 
+		#Adding trace for percentile 95% of controls
 		fig.add_trace(
 			go.Scatter(
 				x = bv_means_controls['MAPINFO'],
@@ -234,6 +262,7 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 			)
 		)
 
+		#Adding trace for percentile 99% of controls
 		fig.add_trace(
 			go.Scatter(
 				x = bv_means_controls['MAPINFO'],
@@ -247,6 +276,7 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 			)
 		)
 
+		# For each sample plot the beta-values
 		for i in range(len(bv_sample)):
 			try:
 				fig.add_trace(
@@ -267,18 +297,19 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 				pass
 
 		fig.add_shape(
-				# Line Horizontal
-					type="line",
-					x0=start,
-					y0=0,
-					x1=end,
-					y1=0,
-					line=dict(
-						color="black",
-						dash="dot",
-					)
+			# Horizontal Line
+			type="line",
+			x0=start,
+			y0=0,
+			x1=end,
+			y1=0,
+			line=dict(
+				color="black",
+				dash="dot",
+			)
 		)
 
+		# Show genes as rectangle
 		for i in range(len(sub_genes)):
 			fig.add_shape(
 				type='rect',
@@ -292,7 +323,7 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 				fillcolor = 'rgba(230, 154, 89, 0.7)'
 			)
 
-			sub_genes.loc[(sub_genes['Gene_end'] > 60500000) & (sub_genes['Gene_start'] < 60700000)]
+			# Compute where to plot the Gene name
 			a = 0
 			if (sub_genes.loc[i]['Gene_start'] < range_plot[0] and sub_genes.loc[i]['Gene_end'] < range_plot[1] and \
 				sub_genes.loc[i]['Gene_end'] > range_plot[0]):
@@ -320,6 +351,8 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 					textposition="top center"
 				)
 			)
+
+			# Compute where to plot the triangle showing the gene strand
 			xplace = sub_genes.loc[i]['Gene_end'] if sub_genes.loc[i]['Gene_strand'] == 1 else sub_genes.loc[i]['Gene_start']
 			genes_dir = xplace+(0.5*prop_len) if sub_genes.loc[i]['Gene_strand'] == 1 else xplace-(0.5*prop_len)
 			yhaut = -0.095-(0.13*sub_genes.loc[i]['track'])
@@ -337,6 +370,7 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 				)
 			)
 
+		# Plot the TFBS that the user selected
 		if TF_drop != None:
 			if len(TF_drop) > 0:
 				if TF_drop[0] != None:
@@ -399,6 +433,8 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 		else:
 			TF_lim = 0
 
+
+		# Plot the CpG locations (islands, shelves, shores, inter) that the user selected
 		if cpg_annots != None and cpg_annots != []:
 			if len(cpg_annots) != 0:
 				#hline cpg
@@ -454,6 +490,8 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 		else:
 			cpg_lim = 0
 
+
+		# Plot the chromatin conformation that the user selected
 		if chromhmm != None and chromhmm != []:
 			if len(chromhmm) != 0:
 				#hline hmm
@@ -509,6 +547,7 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 		else:
 			hmm_lim = 0
 
+		# Plot the enhancers if the user selected the checkbox
 		if enhancers != None:
 			if enhancers == 'true' and len(df_annots.loc[df_annots['Enhancers_Annotations'] == 'enhancers_fantom']) > 0:
 				enh_lim = 0.15
@@ -565,14 +604,17 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 		else:
 			enh_lim = 0
 
+		# len_drops will be the same as prop_len but for the y-axis. It will allows to plot a bigger graph if there are a lot of annotations selected.
+		# Thanks to that, the beta values graph is not flattened
 		len_drops = TF_lim + cpg_lim + hmm_lim + enh_lim
 		#--------------------------------------------
 
-
+		# Define the y ticks to show
 		fig.update_yaxes(
 			tickvals=[0, 0.2, 0.4, 0.6, 0.8, 1]
 		)
 
+		# Defines the layout of the plot
 		fig.update_layout(
 			xaxis = dict(
 				range = range_plot,
@@ -600,9 +642,9 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 					color = 'white'
 				)
 			)
-	#         hovermode='x unified'
 		)
 
+	# Output some important configuration variables
 	config = {
 		'config': {
 			"start": start,
@@ -611,6 +653,7 @@ def create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start
 		}
 	}
 
+	# Create the JSON object with all the information
 	graph = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 	graph_comp = json.loads(graph)
 	graph_comp.update(config)
