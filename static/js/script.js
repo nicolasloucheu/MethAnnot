@@ -39,8 +39,10 @@ $('#update-btn').on('click',function(){
 		},
 		dataType:"json",
 		success: function (data) {
+			var len_drops = 750 + data.config.len_drops*500
 			var config = {
 				responsive: true,
+				showTips: false,
 				modeBarButtons: [
 					[
 						'toImage',
@@ -59,7 +61,8 @@ $('#update-btn').on('click',function(){
 							}
 						}	
 					]
-				]
+				],
+				toImageButtonOptions: {width: 1920, height: len_drops}
 			}
 			Plotly.newPlot('chart', data.data, data.layout, config);
 		}
@@ -96,8 +99,10 @@ $('#chart').on('plotly_relayout',function(){
 		},
 		dataType:"json",
 		success: function (data) {
+			var len_drops = 750 + data.config.len_drops*500
 			var config = {
 				responsive: true,
+				showTips: false,
 				modeBarButtons: [
 					[
 						'toImage',
@@ -116,7 +121,8 @@ $('#chart').on('plotly_relayout',function(){
 							}
 						}	
 					]
-				]
+				],
+				toImageButtonOptions: {width: 1920, height: len_drops}
 			}
 			Plotly.newPlot('chart', data.data, data.layout, config);
 		}
@@ -151,8 +157,10 @@ $('.onoffswitch-checkbox:checkbox').on('click', function(){
 		},
 		dataType:"json",
 		success: function (data) {
+			var len_drops = 750 + data.config.len_drops*500
 			var config = {
 				responsive: true,
+				showTips: false,
 				modeBarButtons: [
 					[
 						'toImage',
@@ -171,7 +179,8 @@ $('.onoffswitch-checkbox:checkbox').on('click', function(){
 							}
 						}	
 					]
-				]
+				],
+				toImageButtonOptions: {width: 1920, height: len_drops}
 			}
 			Plotly.newPlot('chart', data.data, data.layout, config);
 		}
@@ -211,8 +220,10 @@ $('#shift-left').on('click', function() {
 			},
 			dataType:"json",
 			success: function (data) {
+				var len_drops = 750 + data.config.len_drops*500
 				var config = {
 					responsive: true,
+					showTips: false,
 					modeBarButtons: [
 						[
 							'toImage',
@@ -231,7 +242,8 @@ $('#shift-left').on('click', function() {
 								}
 							}	
 						]
-					]
+					],
+					toImageButtonOptions: {width: 1920, height: len_drops}
 				}
 				Plotly.newPlot('chart', data.data, data.layout, config);
 				var TF_options = data.TF_options
@@ -295,8 +307,10 @@ $('#shift-right').on('click', function() {
 			},
 			dataType:"json",
 			success: function (data) {
+				var len_drops = 750 + data.config.len_drops*500
 				var config = {
 					responsive: true,
+					showTips: false,
 					modeBarButtons: [
 						[
 							'toImage',
@@ -315,7 +329,8 @@ $('#shift-right').on('click', function() {
 								}
 							}	
 						]
-					]
+					],
+					toImageButtonOptions: {width: 1920, height: len_drops}
 				}
 				Plotly.newPlot('chart', data.data, data.layout, config);
 				var TF_options = data.TF_options
