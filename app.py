@@ -86,7 +86,7 @@ def home():
 	# If at least one sample and a correct region have been given by the user, do all the computation and return the graph
 	if ready_to_plot:
 		# Create dataframes from initial information (chromosome, start, end and samples paths)
-		TF_options, cpg_options, hmm_options, enh_dis, bv_means_controls, bv_sample, sub_genes, df_TF, df_annots = create_dfs(chrom, start, end, samples)
+		TF_options, cpg_options, hmm_options, enh_dis, bv_means_controls, bv_sample, z_scores, sub_genes, df_TF, df_annots = create_dfs(chrom, start, end, samples)
 		#Store all these informations in session for the variables
 		session['chrom'] = chrom
 		session['start'] = start
@@ -97,12 +97,14 @@ def home():
 		bv_means_controls.to_csv('instance/tmp/bv_means_controls.csv.gz', compression='gzip')
 		bv_json = [i.to_json(orient='split') for i in bv_sample]
 		pickle.dump(bv_json, open("instance/tmp/bv_json.p", "wb"))
+		z_json = [i.to_json(orient='split') for i in z_scores]
+		pickle.dump(z_json, open("instance/tmp/z_json.p", "wb"))
 		sub_genes.to_csv('instance/tmp/sub_genes.csv.gz', compression='gzip')
 		df_TF.to_csv('instance/tmp/df_TF.csv.gz', compression='gzip')
 		df_annots.to_csv('instance/tmp/df_annots.csv.gz', compression='gzip')
 
 		# Create the plot from that information
-		plotly_plot = create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start, end, chrom, None, None, None, None, None, None, col_sample)
+		plotly_plot = create_plot(bv_means_controls, bv_sample, z_scores, sub_genes, df_TF, df_annots, start, end, chrom, None, None, None, None, None, None, col_sample)
 	else:
 		plotly_plot = ""
 
@@ -121,6 +123,7 @@ def change_features():
 	col_sample = session.get('col_sample', None)
 	bv_means_controls = pd.read_csv('instance/tmp/bv_means_controls.csv.gz', index_col=0, compression='gzip')
 	bv_sample = [pd.read_json(i, orient='split') for i in pickle.load(open("instance/tmp/bv_json.p", "rb"))]
+	z_scores = [pd.read_json(i, orient='split') for i in pickle.load(open("instance/tmp/z_json.p", "rb"))]
 	sub_genes = pd.read_csv('instance/tmp/sub_genes.csv.gz', index_col=0, compression='gzip')
 	df_TF = pd.read_csv('instance/tmp/df_TF.csv.gz', index_col=0, compression='gzip')
 	df_annots = pd.read_csv('instance/tmp/df_annots.csv.gz', index_col=0, compression='gzip')
@@ -139,7 +142,7 @@ def change_features():
 	session['cpg_value'] = cpg_value
 	session['hmm_value'] = hmm_value
 	session['enh_val'] = enh_val
-	graphJSON= create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start, end, chrom, TF_value, cpg_value, hmm_value, enh_val, x_range, y_range, col_sample)
+	graphJSON= create_plot(bv_means_controls, bv_sample, z_scores, sub_genes, df_TF, df_annots, start, end, chrom, TF_value, cpg_value, hmm_value, enh_val, x_range, y_range, col_sample)
 	return graphJSON
 
 
@@ -155,6 +158,7 @@ def change_zoom():
 	col_sample = session.get('col_sample', None)
 	bv_means_controls = pd.read_csv('instance/tmp/bv_means_controls.csv.gz', index_col=0, compression='gzip')
 	bv_sample = [pd.read_json(i, orient='split') for i in pickle.load(open("instance/tmp/bv_json.p", "rb"))]
+	z_scores = [pd.read_json(i, orient='split') for i in pickle.load(open("instance/tmp/z_json.p", "rb"))]
 	sub_genes = pd.read_csv('instance/tmp/sub_genes.csv.gz', index_col=0, compression='gzip')
 	df_TF = pd.read_csv('instance/tmp/df_TF.csv.gz', index_col=0, compression='gzip')
 	df_annots = pd.read_csv('instance/tmp/df_annots.csv.gz', index_col=0, compression='gzip')
@@ -176,7 +180,7 @@ def change_zoom():
 	session['cpg_value'] = cpg_value
 	session['hmm_value'] = hmm_value
 	session['enh_val'] = enh_val
-	graphJSON= create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start, end, chrom, TF_value, cpg_value, hmm_value, enh_val, x_range, y_range, col_sample)
+	graphJSON= create_plot(bv_means_controls, bv_sample, z_scores, sub_genes, df_TF, df_annots, start, end, chrom, TF_value, cpg_value, hmm_value, enh_val, x_range, y_range, col_sample)
 	return graphJSON
 
 
@@ -192,6 +196,7 @@ def change_color():
 	col_sample = session.get('col_sample', None)
 	bv_means_controls = pd.read_csv('instance/tmp/bv_means_controls.csv.gz', index_col=0, compression='gzip')
 	bv_sample = [pd.read_json(i, orient='split') for i in pickle.load(open("instance/tmp/bv_json.p", "rb"))]
+	z_scores = [pd.read_json(i, orient='split') for i in pickle.load(open("instance/tmp/z_json.p", "rb"))]
 	sub_genes = pd.read_csv('instance/tmp/sub_genes.csv.gz', index_col=0, compression='gzip')
 	df_TF = pd.read_csv('instance/tmp/df_TF.csv.gz', index_col=0, compression='gzip')
 	df_annots = pd.read_csv('instance/tmp/df_annots.csv.gz', index_col=0, compression='gzip')
@@ -210,7 +215,7 @@ def change_color():
 	col_sample[id_checkbox] = color_sample
 	session['col_sample'] = col_sample
 
-	graphJSON = create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, start, end, chrom, TF_value, cpg_value, hmm_value, enh_val, x_range, y_range, col_sample)
+	graphJSON = create_plot(bv_means_controls, bv_sample, z_scores, sub_genes, df_TF, df_annots, start, end, chrom, TF_value, cpg_value, hmm_value, enh_val, x_range, y_range, col_sample)
 	return graphJSON
 
 
@@ -233,21 +238,23 @@ def change_region():
 	session['end'] = new_end
 
 	# Creating the dataframes for new region
-	TF_options, cpg_options, hmm_options, enh_dis, bv_means_controls, bv_sample, sub_genes, df_TF, df_annots = create_dfs(chrom, new_start, new_end, samples)
+	TF_options, cpg_options, hmm_options, enh_dis, bv_means_controls, bv_sample, z_scores, sub_genes, df_TF, df_annots = create_dfs(chrom, new_start, new_end, samples)
 
 	# Put possible annotation for this new region in a dict to append to JSON object
 	options_dict = {"TF_options": TF_options, "cpg_options": cpg_options, "hmm_options": hmm_options, "enh_dis": enh_dis}
 
 	# Saving dataframes to csv files
-	bv_means_controls.to_csv('instance/tmp/bv_means_controls.csv.gz', index_col=0, compression='gzip')
+	bv_means_controls.to_csv('instance/tmp/bv_means_controls.csv.gz', compression='gzip')
 	bv_json = [i.to_json(orient='split') for i in bv_sample]
 	pickle.dump(bv_json, open("instance/tmp/bv_json.p", "wb"))
-	sub_genes.to_csv('instance/tmp/sub_genes.csv.gz', index_col=0, compression='gzip')
-	df_TF.to_csv('instance/tmp/df_TF.csv.gz', index_col=0, compression='gzip')
-	df_annots.to_csv('instance/tmp/df_annots.csv.gz', index_col=0, compression='gzip')
+	z_json = [i.to_json(orient='split') for i in z_scores]
+	pickle.dump(z_json, open("instance/tmp/z_json.p", "wb"))
+	sub_genes.to_csv('instance/tmp/sub_genes.csv.gz', compression='gzip')
+	df_TF.to_csv('instance/tmp/df_TF.csv.gz', compression='gzip')
+	df_annots.to_csv('instance/tmp/df_annots.csv.gz', compression='gzip')
 
 	# Create the plot
-	plotly_plot = create_plot(bv_means_controls, bv_sample, sub_genes, df_TF, df_annots, new_start, new_end, chrom, None, None, None, None, None, None, col_sample)
+	plotly_plot = create_plot(bv_means_controls, bv_sample, z_scores, sub_genes, df_TF, df_annots, new_start, new_end, chrom, None, None, None, None, None, None, col_sample)
 
 	# Adding the new possible annotations information
 	graphs = json.loads(plotly_plot)

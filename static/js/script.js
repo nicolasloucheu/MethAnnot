@@ -14,8 +14,8 @@ $(function() {
 //Graph update when changing annotations
 $('#update-btn').on('click',function(){
 	var gd = document.getElementById('chart')
-	var xRange = gd.layout.xaxis.range;
-	var yRange = gd.layout.yaxis.range;
+	var xRange = gd.layout.xaxis2.range;
+	var yRange = gd.layout.yaxis2.range;
 	var TF_multiselect = $('#TF_drop').val();
 	var cpg_multiselect = $('#cpg_annots').val();
 	var hmm_multiselect = $('#chromhmm').val();
@@ -60,7 +60,7 @@ $('#update-btn').on('click',function(){
 							title: 'Reset axes',
 							icon: Plotly.Icons.home,
 							click: function(gd) {
-								Plotly.relayout(gd, 'xaxis.range', [data.config.start, data.config.end])
+								Plotly.relayout(gd, 'xaxis2.range', [data.config.start, data.config.end])
 							}
 						}	
 					]
@@ -76,8 +76,8 @@ $('#update-btn').on('click',function(){
 //Graph update when touching the graph (changing zoom, moving)
 $('#chart').on('plotly_relayout',function(){
 	var gd = document.getElementById('chart')
-	var xRange = gd.layout.xaxis.range;
-	var yRange = gd.layout.yaxis.range;
+	var xRange = gd.layout.xaxis2.range;
+	var yRange = gd.layout.yaxis2.range;
 	var TF_multiselect = $('#TF_drop').val();
 	var cpg_multiselect = $('#cpg_annots').val();
 	var hmm_multiselect = $('#chromhmm').val();
@@ -121,7 +121,7 @@ $('#chart').on('plotly_relayout',function(){
 							title: 'Reset axes',
 							icon: Plotly.Icons.home,
 							click: function(gd) {
-								Plotly.relayout(gd, 'xaxis.range', [data.config.start, data.config.end])
+								Plotly.relayout(gd, 'xaxis2.range', [data.config.start, data.config.end])
 							}
 						}	
 					]
@@ -137,8 +137,8 @@ $('#chart').on('plotly_relayout',function(){
 //Graph update when changing color of a sample
 $('.onoffswitch-checkbox:checkbox').on('click', function(){
 	var gd = document.getElementById('chart')
-	var xRange = gd.layout.xaxis.range;
-	var yRange = gd.layout.yaxis.range;
+	var xRange = gd.layout.xaxis2.range;
+	var yRange = gd.layout.yaxis2.range;
 	var $this = $(this)
 
 	if ($this.is(":checked")) {
@@ -244,7 +244,7 @@ $('#shift-left').on('click', function() {
 								title: 'Reset axes',
 								icon: Plotly.Icons.home,
 								click: function(gd) {
-									Plotly.relayout(gd, 'xaxis.range', [data.config.start, data.config.end])
+									Plotly.relayout(gd, 'xaxis2.range', [data.config.start, data.config.end])
 								}
 							}	
 						]
@@ -331,7 +331,7 @@ $('#shift-right').on('click', function() {
 								title: 'Reset axes',
 								icon: Plotly.Icons.home,
 								click: function(gd) {
-									Plotly.relayout(gd, 'xaxis.range', [data.config.start, data.config.end])
+									Plotly.relayout(gd, 'xaxis2.range', [data.config.start, data.config.end])
 								}
 							}	
 						]
