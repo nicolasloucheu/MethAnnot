@@ -108,8 +108,17 @@ def home():
 	else:
 		plotly_plot = ""
 
+	top_z = []
+	mean_lst = {}
+	for sample_value in samples:
+		top_z.append(pd.read_csv(f"instance/uploads/{sample_value}/top_z_scores.csv.gz", compression="gzip", index_col=0))
+		with open(f"instance/uploads/{sample_value}/z_score_mean.pickle", 'rb') as fp:
+			z_mean = pickle.load(fp)
+		mean_lst[sample_value] = z_mean
+	print(mean_lst)
+
 	#Rener everything in the html file
-	return render_template("index.html", samples=samples, region=region, error_region=error_region, region_mes=region_mes, plotly_plot=plotly_plot, ready_to_plot=ready_to_plot, TF_options=TF_options, cpg_options=cpg_options, hmm_options=hmm_options, enh_dis=enh_dis, start=start, end=end, col_sample=col_sample)
+	return render_template("index.html", samples=samples, region=region, error_region=error_region, region_mes=region_mes, plotly_plot=plotly_plot, ready_to_plot=ready_to_plot, TF_options=TF_options, cpg_options=cpg_options, hmm_options=hmm_options, enh_dis=enh_dis, start=start, end=end, col_sample=col_sample, top_z=top_z, mean_lst=mean_lst)
 
 
 # Hidden route to compute the resulting graph when some annotations are added. It will return only the graph, not the html path.
@@ -262,6 +271,54 @@ def change_region():
 	graphJSON = json.dumps(graphs)
 
 	return graphJSON
+
+
+
+# Hidden route to compute the resulting graph when the region is selected from the top z-scores
+@app.route('/show_z_region', methods = ['GET', 'POST'])
+def z_region():
+	# Get all the information from session
+	new_chrom = request.args['chrom']
+	new_start = request.args['start']
+	new_end = request.args['end']
+	samples = session.get('samples', None)
+	col_sample = session.get('col_sample', None)
+	session['TF_value'] = None
+	session['cpg_value'] = None
+	session['hmm_value'] = None
+	session['enh_val'] = None
+
+	# Modifying the start and end session information
+	session['start'] = new_start
+	session['end'] = new_end
+	session['chrom'] = new_chrom
+
+	# Creating the dataframes for new region
+	TF_options, cpg_options, hmm_options, enh_dis, bv_means_controls, bv_sample, z_scores, sub_genes, df_TF, df_annots = create_dfs(new_chrom, new_start, new_end, samples)
+
+	# Put possible annotation for this new region in a dict to append to JSON object
+	options_dict = {"TF_options": TF_options, "cpg_options": cpg_options, "hmm_options": hmm_options, "enh_dis": enh_dis}
+
+	# Saving dataframes to csv files
+	bv_means_controls.to_csv('instance/tmp/bv_means_controls.csv.gz', compression='gzip')
+	bv_json = [i.to_json(orient='split') for i in bv_sample]
+	pickle.dump(bv_json, open("instance/tmp/bv_json.p", "wb"))
+	z_json = [i.to_json(orient='split') for i in z_scores]
+	pickle.dump(z_json, open("instance/tmp/z_json.p", "wb"))
+	sub_genes.to_csv('instance/tmp/sub_genes.csv.gz', compression='gzip')
+	df_TF.to_csv('instance/tmp/df_TF.csv.gz', compression='gzip')
+	df_annots.to_csv('instance/tmp/df_annots.csv.gz', compression='gzip')
+
+	# Create the plot
+	plotly_plot = create_plot(bv_means_controls, bv_sample, z_scores, sub_genes, df_TF, df_annots, new_start, new_end, new_chrom, None, None, None, None, None, None, col_sample)
+
+	# Adding the new possible annotations information
+	graphs = json.loads(plotly_plot)
+	graphs.update(options_dict)
+	graphJSON = json.dumps(graphs)
+
+	return graphJSON
+
 
 
 

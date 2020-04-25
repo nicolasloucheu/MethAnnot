@@ -720,7 +720,6 @@ def create_plot(bv_means_controls, bv_sample, z_scores, sub_genes, df_TF, df_ann
 				row=1,
 				col=1
 				)
-				print(z_scores[i].iloc[:,0])
 				max_tmp_y2.append(max(z_scores[i].iloc[:,0]))
 			except:
 				pass

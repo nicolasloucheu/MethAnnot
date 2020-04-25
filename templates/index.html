@@ -224,6 +224,25 @@
 						</div>
 					</div>
 				</div>
+				{% for top_z_df in top_z %}
+					<div class="row mx-3 mt-4">
+						<div class="col-lg-12">
+							<div class="plottin">
+								<div class="plottin-header">
+									<span>Greatest z-scores for sample: {{top_z_df.columns[0]}}. Mean = {{mean_lst[top_z_df.columns[0]]}}</span>
+								</div>
+								<div class="plottin-body-not">
+										<select id="top_{{top_z_df.columns[0]}}" class="top_z">
+											<option selected disabled>Choose one</option>
+											{% for i in range(top_z_df|length) %}
+												<option>CHR: {{top_z_df.iloc[i].to_list()[1]}} - Position: {{top_z_df.iloc[i].to_list()[2]}}({{top_z_df.iloc[i].name}}) - Z-score: {{top_z_df.iloc[i].to_list()[0]}}</option>
+											{% endfor %}
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+				{% endfor %}
 			</section>
 
 		{% else %}
