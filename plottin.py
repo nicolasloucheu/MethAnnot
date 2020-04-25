@@ -329,6 +329,7 @@ def create_plot(bv_means_controls, bv_sample, z_scores, sub_genes, df_TF, df_ann
 							width = 2
 						),
 						name = f"{bv_sample[i].columns[0]}",
+						legendgroup = f"group_{bv_sample[i].columns[0]}",
 						mode = 'markers+lines',
 						customdata = bv_sample[i].index,
 						hovertemplate = 'Beta-value: %{y:.2f}<br>Position: %{x}<br>CpG name: %{customdata}'
@@ -710,13 +711,16 @@ def create_plot(bv_means_controls, bv_sample, z_scores, sub_genes, df_TF, df_ann
 							color = col_sample[z_scores[i].columns[0]]
 						),
 						name = f"{z_scores[i].columns[0]}",
-						mode = 'markers'
-						# customdata = bv_sample[i].index,
-						# hovertemplate = 'Beta-value: %{y:.2f}<br>Position: %{x}<br>CpG name: %{customdata}'
+						legendgroup = f"group_{z_scores[i].columns[0]}",
+						showlegend = False,
+						mode = 'markers',
+						customdata = z_scores[i].index,
+						hovertemplate = 'Z-score: %{y:.2f}<br>Position: %{x}<br>CpG name: %{customdata}'
 					),
 				row=1,
 				col=1
 				)
+				print(z_scores[i].iloc[:,0])
 				max_tmp_y2.append(max(z_scores[i].iloc[:,0]))
 			except:
 				pass
