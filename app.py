@@ -34,7 +34,8 @@ def home():
 	ready_to_plot = False
 	start = 0
 	end = 0
-	col_sample = {}
+	col_sample = session.get('col_sample', {})
+	print(f"session: {col_sample}")
 	col_check_val = 'off'
 
 	# If a file is given by the user
@@ -54,10 +55,6 @@ def home():
 		if request.method == "POST" and f'del_{sample}' in request.form:
 			samples.remove(sample)
 
-		if request.method == "POST" and f'onoffswitch_{sample}' in request.form:
-			col_sample[sample] = "#00f"
-		else:
-			col_sample[sample] = '#297822'
 
 	# If a region has been given by the user
 	if request.method == "POST" and 'region-input' in request.form:
@@ -111,11 +108,10 @@ def home():
 	top_z = []
 	mean_lst = {}
 	for sample_value in samples:
-		top_z.append(pd.read_csv(f"instance/uploads/{sample_value}/top_z_scores.csv.gz", compression="gzip", index_col=0))
+		top_z.append(pd.read_csv(f"instance/uploads/{sample_value}/top_z_scores.csv.gz", compression="gzip", index_col=0, nrows=100))
 		with open(f"instance/uploads/{sample_value}/z_score_mean.pickle", 'rb') as fp:
 			z_mean = pickle.load(fp)
 		mean_lst[sample_value] = z_mean
-	print(mean_lst)
 
 	#Rener everything in the html file
 	return render_template("index.html", samples=samples, region=region, error_region=error_region, region_mes=region_mes, plotly_plot=plotly_plot, ready_to_plot=ready_to_plot, TF_options=TF_options, cpg_options=cpg_options, hmm_options=hmm_options, enh_dis=enh_dis, start=start, end=end, col_sample=col_sample, top_z=top_z, mean_lst=mean_lst)
@@ -220,8 +216,11 @@ def change_color():
 
 	# Get color information of samples
 	color_sample = request.args['color']
+	print(f"color_sample: {color_sample}")
 	id_checkbox = request.args['id_checkbox'].split('switch_')[-1]
+	print(f"id_checkbox: {id_checkbox}")
 	col_sample[id_checkbox] = color_sample
+	print(f"col_sample: {col_sample}")
 	session['col_sample'] = col_sample
 
 	graphJSON = create_plot(bv_means_controls, bv_sample, z_scores, sub_genes, df_TF, df_annots, start, end, chrom, TF_value, cpg_value, hmm_value, enh_val, x_range, y_range, col_sample)

@@ -209,7 +209,7 @@ $('#shift-left').on('click', function() {
 		var new_start = parseInt(start) - parseInt(shift)
 		var new_end = parseInt(end) - parseInt(shift)
 
-		$("#region-input").val("chr" + chrom + ":" + new_start + "-" + new_end)
+		$("#region-input").val(chrom + ":" + new_start + "-" + new_end)
 
 		$(".selectpicker").selectpicker();
 		$('.selectpicker').val(null)
@@ -278,7 +278,8 @@ $('#shift-left').on('click', function() {
 					$(".enhancers").prop("disabled", true);
 				} else {
 					$(".enhancers").prop("disabled", false);
-				}
+				};
+				document.getElementById("region-show").innerHTML = "REGION: " + chrom + ":" + new_start + "-" + new_end
 			}
 		});
 	}
@@ -300,7 +301,7 @@ $('#shift-right').on('click', function() {
 		var new_start = parseInt(start) + parseInt(shift)
 		var new_end = parseInt(end) + parseInt(shift)
 
-		$("#region-input").val("chr" + chrom + ":" + new_start + "-" + new_end)
+		$("#region-input").val(chrom + ":" + new_start + "-" + new_end)
 
 		$.ajax({
 			url: "update_region",
@@ -365,7 +366,8 @@ $('#shift-right').on('click', function() {
 					$(".enhancers").prop("disabled", true);
 				} else {
 					$(".enhancers").prop("disabled", false);
-				}
+				};
+				document.getElementById("region-show").innerHTML = "REGION: " + chrom + ":" + new_start + "-" + new_end
 			}
 		});
 	}
@@ -373,7 +375,12 @@ $('#shift-right').on('click', function() {
 
 $('.top_z').change(function(event){
 	var z_region = event.target.value;
-	var new_chrom = z_region.split("CHR: ")[1].split(" -")[0]
+	var new_chrom_tmp = z_region.split("CHR: ")[1].split(" -")[0]
+	if (isNaN(new_chrom_tmp)) {
+		var new_chrom = new_chrom_tmp
+	}else{
+		var new_chrom = Math.round(new_chrom_tmp)
+	}
 	var new_start = Number(z_region.split("Position: ")[1].split(".")[0]) - 50000
 	var new_end = Number(z_region.split("Position: ")[1].split(".")[0]) + 50000
 
@@ -442,7 +449,8 @@ $('.top_z').change(function(event){
 				$(".enhancers").prop("disabled", true);
 			} else {
 				$(".enhancers").prop("disabled", false);
-			}
+			};
+			document.getElementById("region-show").innerHTML = "REGION: chr" + new_chrom + ":" + new_start + "-" + new_end
 		}
 	});
 });
