@@ -6,7 +6,10 @@ import plotly
 import json
 import pickle
 import plotly.offline as pyo
+import os
+from functools import reduce
 
+pd.set_option('display.max_rows', None)
 
 # Create the dataframes from region information and sample paths
 def create_dfs(chrom, start, end, sample_name):
@@ -20,12 +23,6 @@ def create_dfs(chrom, start, end, sample_name):
 	with open(f"static/data/genes_index/genes_{chrom}_pos.txt", 'rb') as fp:
 		genes_list = pickle.load(fp)
 	ind_genes = [i for i, x in enumerate(genes_list) if (x >= start and x <= end)]
-	with open(f"static/data/TF_index/TF_{chrom}_lst.txt", 'rb') as fp:
-		TF_index = pickle.load(fp)
-	ind_TF = [i for i, x in enumerate(TF_index) if (x >= start and x <= end)]
-	with open(f"static/data/annots_index/annots_chr_{chrom}_lst.txt", 'rb') as fp:
-		annots_index = pickle.load(fp)
-	ind_annots = [i for i, x in enumerate(annots_index) if (x >= start and x <= end)]
 
 	# Prop_len will be a dynamic variable defining the length of the current x-axis so that object sizes will vary depending on that length. 
 	# They will not be too big nor too small (example: triangles showing the direction of genes have to vary depending on the length of the x-axis)
@@ -95,52 +92,56 @@ def create_dfs(chrom, start, end, sample_name):
 	else:
 		df_genes = pd.DataFrame()
 		sub_genes = pd.DataFrame()
-	
 
-	# TFBS import
-	if len(ind_TF) > 0:
-		df_TF = pd.read_csv(f"static/data/TF_pos/TF_{chrom}.csv.gz", compression='gzip', skiprows = range(1, ind_TF[0]+1), nrows = (ind_TF[-1]-ind_TF[0]+1), index_col=0, keep_default_na=False)
-	else:
-		df_TF = pd.DataFrame()
-	
-	# Other annotations import
-	if len(ind_annots) > 0:
-		df_annots = pd.read_csv(f"static/data/annots_pos/annots_chr_{chrom}.csv.gz", compression='gzip', skiprows = range(1, ind_annots[0]+1), nrows = (ind_annots[-1]-ind_annots[0]+1), index_col=0, keep_default_na=False)
-	else:
-		df_annots = pd.DataFrame()
-	
-	if df_TF.empty:
-		TF_options = []
-	else:
-		TF_options = sorted(list(df_TF['TF_name'].unique()))
-	if df_annots.empty:
-		cpg_options = []
-		hmm_options = []
-		enh_dis = True
-	else:
-		cpg_options = sorted(list(df_annots['CpG_Annotations'].unique()))
-		hmm_options = sorted(list(df_annots['ChromHMM'].unique()))
-		if df_annots.Enhancers_Annotations.unique().all() != 'NA':
-			enh_dis = False
-		else:
-			enh_dis = True
+	directory = "static/data/Annotations"
+	annots_names = next(os.walk(directory))[1]
+	indices_annots = []
+	annotations = []
+	total_options = {}
 
 
-	# z-scores import
+	for i in range(len(annots_names)):
+		for file in os.listdir(f"static/data/Annotations/{annots_names[i]}"):
+			if file.endswith(".json") and f"chr_{chrom}." in file:
+				with open(f"static/data/Annotations/{annots_names[i]}/{file}", 'rb') as json_file:
+					index_annot = json.load(json_file)
+				current_ind = [j for j, x in enumerate(index_annot) if (x >= start and x <= end)]
+				indices_annots.append(current_ind)
+		for file in os.listdir(f"static/data/Annotations/{annots_names[i]}"):
+			if file.endswith(".csv.gz") and f"chr_{chrom}." in file:
+				try:
+					annot_file = pd.read_csv(f"static/data/Annotations/{annots_names[i]}/{file}", compression='gzip', index_col=0, skiprows = range(1, indices_annots[i][0]+1), nrows = (indices_annots[i][-1]-indices_annots[i][0]+1))
+				except:
+					annot_file = pd.DataFrame(columns=["CHR", "MAPINFO"])
+					annot_file[f"{annots_names[i]}"] = np.nan
+				annotations.append(annot_file)
 
 
-	return TF_options, cpg_options, hmm_options, enh_dis, bv_means_controls, bv_sample, z_scores, sub_genes, df_TF, df_annots
+	annots = reduce(lambda x, y: pd.merge(x, y, left_index=True, right_index=True, on = ['CHR', 'MAPINFO'], how='outer'), annotations)
+
+	print(annots)
+
+	for x in annots_names:
+		annots_options = []
+		list_annots = annots.loc[:,x].dropna().to_list()
+		for i in list_annots:
+			each_cpg_list = i.split(',')
+			for j in each_cpg_list:
+				annots_options.append(j)
+		total_options[x] = pd.Series(annots_options).unique().tolist()
+
+	return bv_means_controls, bv_sample, z_scores, sub_genes, annots, annots_names, total_options
 
 
 
-def create_plot(bv_means_controls, bv_sample, z_scores, sub_genes, df_TF, df_annots, start, end, chrom, TF_drop, cpg_annots, chromhmm, enhancers, x_range, y_range, col_sample):
+def create_plot(bv_means_controls, bv_sample, z_scores, sub_genes, start, end, chrom, x_range, y_range, col_sample, annots, annots_values):
 
 	start = int(start)
 	end = int(end)
 	shapes = []
 
 	# If there are no controls, no genes or no samples in the region, the figure will be empty and range from start to end
-	if bv_means_controls.empty or sub_genes.empty or len(bv_sample) == 0:
+	if bv_means_controls.empty and sub_genes.empty and len(bv_sample) == 0:
 		fig = go.Figure(
 			layout = dict(
 				xaxis = dict(
@@ -426,279 +427,6 @@ def create_plot(bv_means_controls, bv_sample, z_scores, sub_genes, df_TF, df_ann
 				col=1
 			)
 
-		# Plot the TFBS that the user selected
-		if TF_drop != None:
-			if len(TF_drop) > 0:
-				if TF_drop[0] != None:
-					#hline TF
-					shapes.append(
-						dict(
-							type="line",
-							x0=start,
-							y0=-0.2-(max(sub_genes.track)*0.13),
-							x1=end,
-							y1=-0.2-(max(sub_genes.track)*0.13),
-							line=dict(
-								color="black",
-								dash="dot",
-							),
-							xref="x2",
-							yref="y2"
-						)
-					)
-					for i in range(len(TF_drop)):
-						TF_fil = df_TF.loc[df_TF['TF_name'] == TF_drop[i]]
-						TF_x = df_TF.MAPINFO.loc[df_TF['TF_name'] == TF_drop[i]].reset_index(drop=True).to_list()
-						TF_y = [-0.28-(max(sub_genes.track)*0.13)-0.15*i] * len(TF_x)
-						pos_map_TF = TF_fil.MAPINFO.to_list()
-						index_TF = TF_fil.index.to_list()
-						name_TF = TF_fil.TF_name.to_list()
-						my_text = [f'Position: {i}<br>CpG site: {j}<br>Transcription Factor: {k}' for i, j, k in zip(pos_map_TF, index_TF, name_TF)] 
-						fig.add_trace(
-							go.Scatter(
-								x = TF_x,
-								y = TF_y,
-								mode = 'markers',
-								line = dict(
-									color = 'rgba(220, 69, 31, 1)',
-									width = 2
-								),
-								legendgroup="TF",
-								showlegend=False,
-								name = '',
-								text = my_text,
-								hoverinfo = "text"
-							),
-							row=2,
-							col=1
-						)  
-						fig.add_trace(
-							go.Scatter(
-								x = [range_plot[0]],
-								y = [TF_y[0]],
-								text = TF_drop[i],
-								mode = 'text',
-								showlegend=False,
-								hoverinfo='none',
-								textfont = dict(
-									size = 13
-								),
-								textposition = 'middle right'
-							),
-							row=2,
-							col=1
-						)
-				if TF_drop[0] == None:
-					TF_lim = 0
-				else:
-					TF_lim = len(TF_drop)*0.15
-			else:
-				TF_lim = 0
-		else:
-			TF_lim = 0
-
-
-		# Plot the CpG locations (islands, shelves, shores, inter) that the user selected
-		if cpg_annots != None and cpg_annots != []:
-			if len(cpg_annots) != 0:
-				#hline cpg
-				shapes.append(
-					dict(
-						type="line",
-						x0=start,
-						y0=-0.2-(max(sub_genes.track)*0.13)-TF_lim,
-						x1=end,
-						y1=-0.2-(max(sub_genes.track)*0.13)-TF_lim,
-						line=dict(
-							color="black",
-							dash="dot",
-						),
-						xref="x2",
-						yref="y2"
-					)
-				)
-				for i in range(len(cpg_annots)):
-					cpg_fil = df_annots.loc[df_annots['CpG_Annotations'] == cpg_annots[i]]
-					cpg_x = df_annots.MAPINFO.loc[df_annots['CpG_Annotations'] == cpg_annots[i]].reset_index(drop=True).to_list()
-					cpg_y = [-0.28-(max(sub_genes.track)*0.13)-TF_lim-(0.15*i)] * len(cpg_x)
-					pos_map_cpg = cpg_fil.MAPINFO.to_list()
-					index_cpg = cpg_fil.index.to_list()
-					name_cpg = cpg_fil.CpG_Annotations.to_list()
-					my_text = [f'Position: {i}<br>CpG site: {j}<br>CpG annotation: {k}' for i, j, k in zip(pos_map_cpg, index_cpg, name_cpg)] 
-					fig.add_trace(
-						go.Scatter(
-							x = cpg_x,
-							y = cpg_y,
-							mode = 'markers',
-							line = dict(
-								color = 'rgba(108, 60, 51, 1)',
-								width = 2
-							),
-							legendgroup="cpg",
-							showlegend=False,
-							text = my_text,
-							hoverinfo = 'text'
-						),
-						row=2,
-						col=1
-					)  
-					fig.add_trace(
-						go.Scatter(
-							x = [range_plot[0]],
-							y = [cpg_y[0]],
-							text = cpg_annots[i],
-							mode = 'text',
-							showlegend=False,
-							hoverinfo='none',
-							textfont = dict(
-								size = 13
-							),
-							textposition = 'middle right'
-						),
-						row=2,
-						col=1
-					)
-			cpg_lim = len(cpg_annots)*0.15
-		else:
-			cpg_lim = 0
-
-
-		# Plot the chromatin conformation that the user selected
-		if chromhmm != None and chromhmm != []:
-			if len(chromhmm) != 0:
-				#hline hmm
-				shapes.append(
-					dict(
-						type="line",
-						x0=start,
-						y0=-0.2-(max(sub_genes.track)*0.13)-TF_lim-cpg_lim,
-						x1=end,
-						y1=-0.2-(max(sub_genes.track)*0.13)-TF_lim-cpg_lim,
-						line=dict(
-							color="black",
-							dash="dot",
-						),
-						xref="x2",
-						yref="y2"
-					)
-				)
-				for i in range(len(chromhmm)):
-					hmm_fil = df_annots.loc[df_annots['ChromHMM'] == chromhmm[i]]
-					hmm_x = df_annots.MAPINFO.loc[df_annots['ChromHMM'] == chromhmm[i]].reset_index(drop=True).to_list()
-					hmm_y = [-0.28-(max(sub_genes.track)*0.13)-TF_lim-cpg_lim-(0.15*i)] * len(hmm_x)
-					pos_map_hmm = hmm_fil.MAPINFO.to_list()
-					index_hmm = hmm_fil.index.to_list()
-					name_hmm = hmm_fil.ChromHMM.to_list()
-					my_text = [f'Position: {i}<br>CpG site: {j}<br>Chromatin State: {k}' for i, j, k in zip(pos_map_hmm, index_hmm, name_hmm)] 
-					fig.add_trace(
-						go.Scatter(
-							x = hmm_x,
-							y = hmm_y,
-							mode = 'markers',
-							line = dict(
-								color = 'rgba(198, 39, 21, 1)',
-								width = 2
-							),
-							legendgroup="hmm",
-							showlegend=False,
-							text = my_text,
-							hoverinfo = 'text'
-						),
-						row=2,
-						col=1
-					)  
-					fig.add_trace(
-						go.Scatter(
-							x = [range_plot[0]],
-							y = [hmm_y[0]],
-							text = chromhmm[i],
-							mode = 'text',
-							showlegend=False,
-							hoverinfo='none',
-							textfont = dict(
-								size = 13
-							),
-							textposition = 'middle right'
-						),
-						row=2,
-						col=1
-					)
-			hmm_lim = len(chromhmm)*0.15
-		else:
-			hmm_lim = 0
-
-		# Plot the enhancers if the user selected the checkbox
-		if enhancers != None:
-			if enhancers == 'true' and len(df_annots.loc[df_annots['Enhancers_Annotations'] == 'enhancers_fantom']) > 0:
-				enh_lim = 0.15
-				#hline enhancers
-				shapes.append(
-					dict(
-						type="line",
-						x0=start,
-						y0=-0.2-(max(sub_genes.track)*0.13)-TF_lim-cpg_lim-hmm_lim,
-						x1=end,
-						y1=-0.2-(max(sub_genes.track)*0.13)-TF_lim-cpg_lim-hmm_lim,
-						line=dict(
-							color="black",
-							dash="dot",
-						),
-						xref="x2",
-						yref="y2"
-					)
-				)
-				enh_fil = df_annots.loc[df_annots['Enhancers_Annotations'] == 'enhancers_fantom']
-				enh_x = df_annots.MAPINFO.loc[df_annots['Enhancers_Annotations'] == 'enhancers_fantom'].reset_index(drop=True).to_list()
-				enh_y = [-0.28-(max(sub_genes.track)*0.13)-TF_lim-cpg_lim-hmm_lim] * len(enh_x)
-				pos_map_enh = enh_fil.MAPINFO.to_list()
-				index_enh = enh_fil.index.to_list()
-				my_text = [f'Position: {i}<br>CpG site: {j}<br>Fantom Enhancer' for i, j in zip(pos_map_enh, index_enh)] 
-				fig.add_trace(
-					go.Scatter(
-						x = enh_x,
-						y = enh_y,
-						mode = 'markers',
-						line = dict(
-							color = 'rgba(111, 82, 151, 1)',
-							width = 2
-						),
-						name = 'Enhancer',
-						legendgroup="enh",
-						showlegend=False,
-						text = my_text,
-						hoverinfo = 'text'
-					),
-					row=2,
-					col=1
-				)
-				fig.add_trace(
-					go.Scatter(
-						x = [range_plot[0]],
-						y = [enh_y[0]],
-						text = 'Enhancers',
-						mode = 'text',
-						showlegend=False,
-						hoverinfo='none',
-						textfont = dict(
-							size = 13
-						),
-						textposition = 'middle right'
-					),
-					row=2,
-					col=1
-				)
-			else:
-				enh_lim = 0
-		else:
-			enh_lim = 0
-
-		# len_drops will be the same as prop_len but for the y-axis. It will allows to plot a bigger graph if there are a lot of annotations selected.
-		# Thanks to that, the beta values graph is not flattened
-		len_drops = TF_lim + cpg_lim + hmm_lim + enh_lim
-
-
-
-
 		###Plotting z-scores
 		max_tmp_y2 = []
 		for i in range(len(z_scores)):
@@ -723,7 +451,10 @@ def create_plot(bv_means_controls, bv_sample, z_scores, sub_genes, df_TF, df_ann
 				max_tmp_y2.append(max(z_scores[i].iloc[:,0]))
 			except:
 				pass
-		max_y2 = max(6, max(max_tmp_y2))
+		try:
+			max_y2 = max(6, max(max_tmp_y2))
+		except:
+			max_y2 = 6
 
 		#Threshold
 		shapes.append(
@@ -741,6 +472,94 @@ def create_plot(bv_means_controls, bv_sample, z_scores, sub_genes, df_TF, df_ann
 				yref="y1"
 			)
 		)
+
+		#Plot the annotations the user selected
+
+		color_palette = ['rgba(231,148,26,1)', 'rgba(194,16,12,1)', 'rgba(55,186,77)', 'rgba(34,86,177,1)', 'rgba(239,138,76,1)', 'rgba(37,124,112,1)', 'rgba(34,3,44,1)']
+
+		to_del = []
+		annots_to_plot = {}
+		annots_merge = pd.DataFrame(columns=['CHR', 'MAPINFO'])
+
+		for annot_name in annots_values:
+			if annots_values[annot_name] == None:
+				to_del.append(annot_name)
+
+		for i in to_del:
+			del annots_values[i]
+
+		for i in annots_values:
+			annots_to_plot.setdefault(i, {})
+			for j in annots_values[i]:
+				tmp = annots.loc[annots[i].str.contains(j, na=False), ["CHR", "MAPINFO", i]].rename(columns={i: j})
+				tmp[j] = j
+				annots_merge = pd.merge(tmp, annots_merge, left_index=True, right_index=True, on=['CHR', 'MAPINFO'], how='outer')
+				annots_to_plot[i][j] = tmp.MAPINFO.to_list()
+
+		list_len = [0]
+		for i in annots_to_plot:
+			list_len.append(len(annots_to_plot[i]))
+		list_len = np.cumsum(list_len).tolist()
+		len_drops = list_len[-1]
+
+		for i, j in enumerate(annots_to_plot):
+			shapes.append(
+				dict(
+					type="line",
+					x0=start,
+					y0=-0.2-(max(sub_genes.track)*0.13)-0.1*i-list_len[i]*0.1,
+					x1=end,
+					y1=-0.2-(max(sub_genes.track)*0.13)-0.1*i-list_len[i]*0.1,
+					line=dict(
+						color="black",
+						dash="dot",
+					),
+					xref="x2",
+					yref="y2"
+				)
+			)
+			for k, l in enumerate(annots_to_plot[j]):
+				annots_x = annots_to_plot[j][l]
+				annots_y = [-0.3-(max(sub_genes.track)*0.13)-0.1*i-list_len[i]*0.1-0.1*k] * len(annots_x)
+				sub_df = annots_merge.loc[annots_merge['MAPINFO'].isin(annots_to_plot[j][l]), ['MAPINFO', l]]
+				group_annots = [j for x in range(len(annots_x))]
+				pos_map = sub_df.MAPINFO.to_list()
+				index_annots = sub_df.index.to_list()
+				name_annots = sub_df[l].to_list()
+				my_text = [f'Position: {i}<br>CpG site: {j}<br>Group of annotation: {k}<br>Annotation: {l}' for i, j, k, l in zip(pos_map, index_annots, group_annots, name_annots)] 
+				fig.add_trace(
+					go.Scatter(
+						x = annots_x,
+						y = annots_y,
+						mode = 'markers',
+						line = dict(
+							color = color_palette[i],
+							width = 2
+						),
+						showlegend=False,
+						name = '',
+						text = my_text,
+						hoverinfo = "text"
+					),
+					row=2,
+					col=1
+				)
+				fig.add_trace(
+					go.Scatter(
+						x = [range_plot[0]],
+						y = [annots_y[0]],
+						text = l,
+						mode = 'text',
+						showlegend=False,
+						hoverinfo='none',
+						textfont = dict(
+							size = 13
+						),
+						textposition = 'middle right'
+					),
+					row=2,
+					col=1
+				)
 
 
 		#--------------------------------------------
@@ -783,7 +602,7 @@ def create_plot(bv_means_controls, bv_sample, z_scores, sub_genes, df_TF, df_ann
 				),
 				tickvals = [0, 0.2, 0.4, 0.6, 0.8, 1]
 			),
-			height=750+(len_drops*500),
+			height=750+(len_drops*40),
 			paper_bgcolor = '#393833',
 			legend = dict(
 				font = dict(
@@ -796,8 +615,7 @@ def create_plot(bv_means_controls, bv_sample, z_scores, sub_genes, df_TF, df_ann
 	config = {
 		'config': {
 			"start": start,
-			"end": end,
-			"len_drops": len_drops
+			"end": end
 		}
 	}
 

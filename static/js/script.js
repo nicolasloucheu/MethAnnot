@@ -16,15 +16,11 @@ $('#update-btn').on('click',function(){
 	var gd = document.getElementById('chart')
 	var xRange = gd.layout.xaxis2.range;
 	var yRange = gd.layout.yaxis2.range;
-	var TF_multiselect = $('#TF_drop').val();
-	var cpg_multiselect = $('#cpg_annots').val();
-	var hmm_multiselect = $('#chromhmm').val();
+	var annots_names = document.getElementsByClassName('selectpicker');
+	var annots = {};
 
-	if ($('.enhancers').prop('checked') == null) {
-		var enh_val = false
-	}
-	else {
-		var enh_val = $('.enhancers').prop('checked')
+	for (i = 0; i < annots_names.length; i++) {
+		annots[annots_names[i].id] = ($("#" + annots_names[i].id).val());
 	}
 
 	$.ajax({
@@ -32,13 +28,9 @@ $('#update-btn').on('click',function(){
 		type: "GET",
 		contentType: 'application/json;charset=UTF-8',
 		data: {
-			'TF_value': TF_multiselect,
-			'cpg_value': cpg_multiselect,
-			'hmm_value': hmm_multiselect,
-			'enh_val': enh_val,
+			'annots': JSON.stringify(annots),
 			'xrange': xRange,
 			'yrange': yRange
-
 		},
 		dataType:"json",
 		success: function (data) {
@@ -78,15 +70,11 @@ $('#chart').on('plotly_relayout',function(){
 	var gd = document.getElementById('chart')
 	var xRange = gd.layout.xaxis2.range;
 	var yRange = gd.layout.yaxis2.range;
-	var TF_multiselect = $('#TF_drop').val();
-	var cpg_multiselect = $('#cpg_annots').val();
-	var hmm_multiselect = $('#chromhmm').val();
-	
-	if ($('#enhancers').prop('checked') == null) {
-		var enh_val = false
-	}
-	else {
-		var enh_val = $('#enhancers').prop('checked')
+	var annots_names = document.getElementsByClassName('selectpicker');
+	var annots = {};
+
+	for (i = 0; i < annots_names.length; i++) {
+		annots[annots_names[i].id] = ($("#" + annots_names[i].id).val());
 	}
 
 	$.ajax({
@@ -96,10 +84,7 @@ $('#chart').on('plotly_relayout',function(){
 		data: {
 			'xrange': xRange,
 			'yrange': yRange,
-			'TF_value': TF_multiselect,
-			'cpg_value': cpg_multiselect,
-			'hmm_value': hmm_multiselect,
-			'enh_val': enh_val
+			'annots': JSON.stringify(annots)
 		},
 		dataType:"json",
 		success: function (data) {
@@ -139,6 +124,14 @@ $('.onoffswitch-checkbox:checkbox').on('click', function(){
 	var gd = document.getElementById('chart')
 	var xRange = gd.layout.xaxis2.range;
 	var yRange = gd.layout.yaxis2.range;
+	var annots_names = document.getElementsByClassName('selectpicker');
+	var annots = {};
+
+	for (i = 0; i < annots_names.length; i++) {
+		annots[annots_names[i].id] = ($("#" + annots_names[i].id).val());
+	}
+
+
 	var $this = $(this)
 
 	if ($this.is(":checked")) {
@@ -158,7 +151,8 @@ $('.onoffswitch-checkbox:checkbox').on('click', function(){
 			"id_checkbox": id_checkbox,
 			"color": color,
 			'xrange': xRange,
-			'yrange': yRange
+			'yrange': yRange,
+			'annots': JSON.stringify(annots)
 		},
 		dataType:"json",
 		success: function (data) {
@@ -252,33 +246,21 @@ $('#shift-left').on('click', function() {
 					toImageButtonOptions: {width: 1920, height: len_drops}
 				}
 				Plotly.newPlot('chart', data.data, data.layout, config);
-				var TF_options = data.TF_options
-				var cpg_options = data.cpg_options
-				var hmm_options = data.hmm_options
-				var enh_dis = data.enh_dis
-				var $TF_drop = $('#TF_drop');
-				var $cpg_annots = $('#cpg_annots');
-				var $chromhmm = $('#chromhmm');
+				var annots_names = document.getElementsByClassName('selectpicker');
+				var annots_values = {}
+
+				for (i = 0; i < annots_names.length; i++) {
+					annots_values[annots_names[i].id] = data[annots_names[i].id];
+				};
 				$(".selectpicker").selectpicker();
-				$TF_drop.html('');
-				$cpg_annots.html('');
-				$chromhmm.html('');
-				$.each(TF_options, function(value, item) {
-					$TF_drop.append('<option>' + item + '</option>');
-				});
-				$.each(cpg_options, function(value, item) {
-					$cpg_annots.append('<option>' + item + '</option>');
-				});
-				$.each(hmm_options, function(value, item) {
-					$chromhmm.append('<option>' + item + '</option>');
-				});
+				for (i = 0; i < annots_names.length; i++) {
+					$("#" + annots_names[i].id).html('');
+					$.each(annots_values[annots_names[i].id], function(value, item){
+						$("#" + annots_names[i].id).append('<option>' + item + '</option>');
+					});
+				};
 				$('.selectpicker').selectpicker('refresh');
 
-				if (enh_dis) {
-					$(".enhancers").prop("disabled", true);
-				} else {
-					$(".enhancers").prop("disabled", false);
-				};
 				document.getElementById("region-show").innerHTML = "REGION: " + chrom + ":" + new_start + "-" + new_end
 			}
 		});
@@ -340,33 +322,20 @@ $('#shift-right').on('click', function() {
 					toImageButtonOptions: {width: 1920, height: len_drops}
 				}
 				Plotly.newPlot('chart', data.data, data.layout, config);
-				var TF_options = data.TF_options
-				var cpg_options = data.cpg_options
-				var hmm_options = data.hmm_options
-				var enh_dis = data.enh_dis
-				var $TF_drop = $('#TF_drop');
-				var $cpg_annots = $('#cpg_annots');
-				var $chromhmm = $('#chromhmm');
-				$(".selectpicker").selectpicker();
-				$TF_drop.html('');
-				$cpg_annots.html('');
-				$chromhmm.html('');
-				$.each(TF_options, function(value, item) {
-					$TF_drop.append('<option>' + item + '</option>');
-				});
-				$.each(cpg_options, function(value, item) {
-					$cpg_annots.append('<option>' + item + '</option>');
-				});
-				$.each(hmm_options, function(value, item) {
-					$chromhmm.append('<option>' + item + '</option>');
-				});
-				$('.selectpicker').selectpicker('refresh');
+				var annots_names = document.getElementsByClassName('selectpicker');
+				var annots_values = {}
 
-				if (enh_dis) {
-					$(".enhancers").prop("disabled", true);
-				} else {
-					$(".enhancers").prop("disabled", false);
+				for (i = 0; i < annots_names.length; i++) {
+					annots_values[annots_names[i].id] = data[annots_names[i].id];
 				};
+				$(".selectpicker").selectpicker();
+				for (i = 0; i < annots_names.length; i++) {
+					$("#" + annots_names[i].id).html('');
+					$.each(annots_values[annots_names[i].id], function(value, item){
+						$("#" + annots_names[i].id).append('<option>' + item + '</option>');
+					});
+				};
+				$('.selectpicker').selectpicker('refresh');
 				document.getElementById("region-show").innerHTML = "REGION: " + chrom + ":" + new_start + "-" + new_end
 			}
 		});
@@ -397,7 +366,7 @@ $('.top_z').change(function(event){
 		},
 		dataType:"json",
 		success: function (data) {
-			var len_drops = 750 + data.config.len_drops*500
+			var len_drops = 750 + 0*500
 			var config = {
 				responsive: true,
 				showTips: false,
@@ -423,33 +392,20 @@ $('.top_z').change(function(event){
 				toImageButtonOptions: {width: 1920, height: len_drops}
 			}
 			Plotly.newPlot('chart', data.data, data.layout, config);
-			var TF_options = data.TF_options
-			var cpg_options = data.cpg_options
-			var hmm_options = data.hmm_options
-			var enh_dis = data.enh_dis
-			var $TF_drop = $('#TF_drop');
-			var $cpg_annots = $('#cpg_annots');
-			var $chromhmm = $('#chromhmm');
-			$(".selectpicker").selectpicker();
-			$TF_drop.html('');
-			$cpg_annots.html('');
-			$chromhmm.html('');
-			$.each(TF_options, function(value, item) {
-				$TF_drop.append('<option>' + item + '</option>');
-			});
-			$.each(cpg_options, function(value, item) {
-				$cpg_annots.append('<option>' + item + '</option>');
-			});
-			$.each(hmm_options, function(value, item) {
-				$chromhmm.append('<option>' + item + '</option>');
-			});
-			$('.selectpicker').selectpicker('refresh');
+			var annots_names = document.getElementsByClassName('selectpicker');
+			var annots_values = {}
 
-			if (enh_dis) {
-				$(".enhancers").prop("disabled", true);
-			} else {
-				$(".enhancers").prop("disabled", false);
+			for (i = 0; i < annots_names.length; i++) {
+				annots_values[annots_names[i].id] = data[annots_names[i].id];
 			};
+			$(".selectpicker").selectpicker();
+			for (i = 0; i < annots_names.length; i++) {
+				$("#" + annots_names[i].id).html('');
+				$.each(annots_values[annots_names[i].id], function(value, item){
+					$("#" + annots_names[i].id).append('<option>' + item + '</option>');
+				});
+			};
+			$('.selectpicker').selectpicker('refresh');
 			document.getElementById("region-show").innerHTML = "REGION: chr" + new_chrom + ":" + new_start + "-" + new_end
 		}
 	});
