@@ -141,7 +141,7 @@ def create_plot(bv_means_controls, bv_sample, z_scores, sub_genes, start, end, c
 	shapes = []
 
 	# If there are no controls, no genes or no samples in the region, the figure will be empty and range from start to end
-	if bv_means_controls.empty and sub_genes.empty and len(bv_sample) == 0:
+	if bv_means_controls.empty and sub_genes.empty and bv_sample[0].empty:
 		fig = go.Figure(
 			layout = dict(
 				xaxis = dict(
