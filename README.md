@@ -23,7 +23,7 @@ Here is a way to compute those files.
 
 ![Figure 1](examples/Figure1.png)
 
-* Second, this dataframe must be mapped to the genome with the hg38_manifest.csv file. This will add two columns to the dataframe. "CHR" with the name of the chromosome and "MAPINFO" with the position of the CpG site. (Figure 2)
+* Second, this dataframe must be mapped to the genome with the hg38_manifest.csv file (provided in the "example" folder). This will add two columns to the dataframe. "CHR" with the name of the chromosome and "MAPINFO" with the position of the CpG site. (Figure 2)
 
 ![Figure 2](examples/Figure2.png)
 
@@ -35,5 +35,5 @@ Here is a way to compute those files.
 
 Important point: the column containing the annotations in the dataframe must have the same name as the name of the folder containing all the annotations.
 
-A script doing all these steps for an example file is given in the folder examples.
+A script doing all these steps for an example file is given in the folder "examples".
 
